@@ -81,12 +81,12 @@
 
             <div class="content">
                 <div class="title">
-                    Birdboard
+                    Project board
                 </div>
 
-                <div class="links">
-                    <a href="https://laracasts.com/series/build-a-laravel-app-with-tdd">Watch the Laracasts</a>
-                </div>
+{{--                <div class="links">--}}
+{{--                    <a href="https://laracasts.com/series/build-a-laravel-app-with-tdd">Watch the Laracasts</a>--}}
+{{--                </div>--}}
             </div>
         </div>
     </body>

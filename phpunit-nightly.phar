@@ -1,0 +1,3197 @@
+#!/usr/bin/env php
+<?php
+if (version_compare('7.2.0', PHP_VERSION, '>')) {
+    fwrite(
+        STDERR,
+        sprintf(
+            'PHPUnit nightly by Sebastian Bergmann and contributors.' . PHP_EOL . PHP_EOL .
+            'This version of PHPUnit is supported on PHP 7.2, PHP 7.3, and PHP 7.4.' . PHP_EOL .
+            'You are using PHP %s (%s).' . PHP_EOL,
+            PHP_VERSION,
+            PHP_BINARY
+        )
+    );
+
+    die(1);
+}
+
+if (__FILE__ === realpath($_SERVER['SCRIPT_NAME'])) {
+    $execute = true;
+} else {
+    $execute = false;
+}
+
+$options = getopt('', array('prepend:', 'manifest'));
+
+if (isset($options['prepend'])) {
+    require $options['prepend'];
+}
+
+if (isset($options['manifest'])) {
+    $printManifest = true;
+}
+
+unset($options);
+
+define('__PHPUNIT_PHAR__', str_replace(DIRECTORY_SEPARATOR, '/', __FILE__));
+define('__PHPUNIT_PHAR_ROOT__', 'phar://phpunit-nightly.phar');
+
+Phar::mapPhar('phpunit-nightly.phar');
+
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/DeepCopy.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/Exception/CloneException.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/Exception/PropertyException.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/Filter/Filter.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/Filter/Doctrine/DoctrineCollectionFilter.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/Filter/Doctrine/DoctrineEmptyCollectionFilter.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/Filter/Doctrine/DoctrineProxyFilter.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/Filter/KeepFilter.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/Filter/ReplaceFilter.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/Filter/SetNullFilter.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/Matcher/Matcher.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/Matcher/Doctrine/DoctrineProxyMatcher.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/Matcher/PropertyMatcher.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/Matcher/PropertyNameMatcher.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/Matcher/PropertyTypeMatcher.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/Reflection/ReflectionHelper.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/TypeFilter/TypeFilter.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/TypeFilter/Date/DateIntervalFilter.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/TypeFilter/ReplaceFilter.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/TypeFilter/ShallowCopyFilter.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/TypeFilter/Spl/SplDoublyLinkedListFilter.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/TypeFilter/Spl/SplDoublyLinkedList.php';
+require 'phar://phpunit-nightly.phar' . '/myclabs-deep-copy/DeepCopy/TypeMatcher/TypeMatcher.php';
+require 'phar://phpunit-nightly.phar' . '/doctrine-instantiator/Doctrine/Instantiator/Exception/ExceptionInterface.php';
+require 'phar://phpunit-nightly.phar' . '/doctrine-instantiator/Doctrine/Instantiator/Exception/InvalidArgumentException.php';
+require 'phar://phpunit-nightly.phar' . '/doctrine-instantiator/Doctrine/Instantiator/Exception/UnexpectedValueException.php';
+require 'phar://phpunit-nightly.phar' . '/doctrine-instantiator/Doctrine/Instantiator/InstantiatorInterface.php';
+require 'phar://phpunit-nightly.phar' . '/doctrine-instantiator/Doctrine/Instantiator/Instantiator.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Assert.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/SelfDescribing.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/AssertionFailedError.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/CodeCoverageException.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/Constraint.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/ArrayHasKey.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/ArraySubset.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/Composite.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/Attribute.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/Callback.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/ClassHasAttribute.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/ClassHasStaticAttribute.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/Count.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/DirectoryExists.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/ExceptionCode.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/ExceptionMessage.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/ExceptionMessageRegularExpression.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/FileExists.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/GreaterThan.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/IsAnything.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/IsEmpty.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/IsEqual.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/IsFalse.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/IsFinite.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/IsIdentical.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/IsInfinite.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/IsInstanceOf.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/IsJson.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/IsNan.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/IsNull.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/IsReadable.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/IsTrue.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/IsType.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/IsWritable.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/JsonMatches.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/JsonMatchesErrorMessageProvider.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/LessThan.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/LogicalAnd.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/LogicalNot.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/LogicalOr.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/LogicalXor.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/ObjectHasAttribute.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/RegularExpression.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/SameSize.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/StringContains.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/StringEndsWith.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/StringMatchesFormatDescription.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/StringStartsWith.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/TraversableContains.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Constraint/TraversableContainsOnly.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/RiskyTestError.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/CoveredCodeNotExecutedException.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Test.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/TestSuite.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/DataProviderTestSuite.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/Error.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/ExceptionWrapper.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/ExpectationFailedException.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/IncompleteTest.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/TestCase.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/IncompleteTestCase.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/IncompleteTestError.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/InvalidCoversTargetException.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/InvalidDataProviderException.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/MissingCoversAnnotationException.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Api/Api.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Exception/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Exception/BadMethodCallException.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Builder/Identity.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Builder/Stub.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Builder/Match.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Builder/ParametersMatch.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Builder/MethodNameMatch.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Builder/InvocationMocker.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Builder/NamespaceMatch.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/ConfigurableMethod.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Exception/ConfigurableMethodsAlreadyInitializedException.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Generator.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Exception/IncompatibleReturnValueException.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Invocation.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Verifiable.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Invokable.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Stub/MatcherCollection.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/InvocationMocker.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Matcher/Invocation.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Matcher.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Matcher/InvokedRecorder.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Matcher/AnyInvokedCount.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Matcher/StatelessInvocation.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Matcher/AnyParameters.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Matcher/ConsecutiveParameters.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Matcher/DeferredError.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Matcher/InvokedAtIndex.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Matcher/InvokedAtLeastCount.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Matcher/InvokedAtLeastOnce.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Matcher/InvokedAtMostCount.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Matcher/InvokedCount.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Matcher/MethodName.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Matcher/Parameters.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Api/Method.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/MockBuilder.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/MockType.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/MockClass.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/MockMethod.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/MockMethodSet.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Stub.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/MockObject.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/MockTrait.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Api/MockedCloneMethod.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Exception/RuntimeException.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Stub/Stub.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Stub/ConsecutiveCalls.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Stub/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Stub/ReturnArgument.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Stub/ReturnCallback.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Stub/ReturnReference.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Stub/ReturnSelf.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Stub/ReturnStub.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Stub/ReturnValueMap.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/MockObject/Api/UnmockedCloneMethod.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/OutputError.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/SyntheticError.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/PHPTAssertionFailedError.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/SkippedTest.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/SkippedTestCase.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/SkippedTestError.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/SkippedTestSuiteError.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/SyntheticSkippedError.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/TestBuilder.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/TestFailure.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/TestListener.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/TestListenerDefaultImplementation.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/TestResult.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/TestSuiteIterator.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/UnintentionallyCoveredCodeError.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/Exception/Warning.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Framework/WarningTestCase.php';
+require 'phar://phpunit-nightly.phar' . '/php-token-stream/Token.php';
+require 'phar://phpunit-nightly.phar' . '/php-token-stream/Token/Stream.php';
+require 'phar://phpunit-nightly.phar' . '/php-token-stream/Token/Stream/CachingFactory.php';
+require 'phar://phpunit-nightly.phar' . '/php-token-stream/Token/Util.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/Type.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/Application.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/ApplicationName.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/Author.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/AuthorCollection.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/AuthorCollectionIterator.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/ManifestElement.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/AuthorElement.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/ElementCollection.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/AuthorElementCollection.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/BundledComponent.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/BundledComponentCollection.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/BundledComponentCollectionIterator.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/BundlesElement.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/ComponentElement.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/ComponentElementCollection.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/ContainsElement.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/CopyrightElement.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/CopyrightInformation.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/Email.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/exceptions/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/ExtElement.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/ExtElementCollection.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/Extension.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/ExtensionElement.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/exceptions/InvalidApplicationNameException.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/exceptions/InvalidEmailException.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/exceptions/InvalidUrlException.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/Library.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/License.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/LicenseElement.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/Manifest.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/ManifestDocument.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/exceptions/ManifestDocumentException.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/ManifestDocumentLoadingException.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/ManifestDocumentMapper.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/exceptions/ManifestDocumentMapperException.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/exceptions/ManifestElementException.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/ManifestLoader.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/exceptions/ManifestLoaderException.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/ManifestSerializer.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/PhpElement.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/Requirement.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/PhpExtensionRequirement.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/PhpVersionRequirement.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/RequirementCollection.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/RequirementCollectionIterator.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/xml/RequiresElement.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-manifest/values/Url.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/constraints/VersionConstraint.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/constraints/AbstractVersionConstraint.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/constraints/AndVersionConstraintGroup.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/constraints/AnyVersionConstraint.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/constraints/ExactVersionConstraint.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/exceptions/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/constraints/GreaterThanOrEqualToVersionConstraint.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/exceptions/InvalidPreReleaseSuffixException.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/exceptions/InvalidVersionException.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/constraints/OrVersionConstraintGroup.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/PreReleaseSuffix.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/constraints/SpecificMajorAndMinorVersionConstraint.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/constraints/SpecificMajorVersionConstraint.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/exceptions/UnsupportedVersionConstraintException.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/Version.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/VersionConstraintParser.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/VersionConstraintValue.php';
+require 'phar://phpunit-nightly.phar' . '/phar-io-version/VersionNumber.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Hook/Hook.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Hook/TestHook.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Hook/AfterIncompleteTestHook.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Hook/AfterLastTestHook.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Hook/AfterRiskyTestHook.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Hook/AfterSkippedTestHook.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Hook/AfterSuccessfulTestHook.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Hook/AfterTestErrorHook.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Hook/AfterTestFailureHook.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Hook/AfterTestHook.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Hook/AfterTestWarningHook.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/BaseTestRunner.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Hook/BeforeFirstTestHook.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Hook/BeforeTestHook.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/TestResultCache.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/DefaultTestResultCache.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Filter/GroupFilterIterator.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Filter/ExcludeGroupFilterIterator.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Filter/Factory.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Filter/IncludeGroupFilterIterator.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Filter/NameFilterIterator.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/NullTestResultCache.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/PhptTestCase.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/ResultCacheExtension.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/TestSuiteLoader.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/StandardTestSuiteLoader.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Hook/TestListenerAdapter.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/TestSuiteSorter.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Runner/Version.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-code-unit-reverse-lookup/Wizard.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-comparator/Comparator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-comparator/ArrayComparator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-comparator/ComparisonFailure.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-comparator/ObjectComparator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-comparator/DOMNodeComparator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-comparator/DateTimeComparator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-comparator/ScalarComparator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-comparator/NumericComparator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-comparator/DoubleComparator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-comparator/ExceptionComparator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-comparator/Factory.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-comparator/MockObjectComparator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-comparator/ResourceComparator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-comparator/SplObjectStorageComparator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-comparator/TypeComparator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/Chunk.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/Exception/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/Exception/InvalidArgumentException.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/Exception/ConfigurationException.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/Diff.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/Differ.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/Line.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/LongestCommonSubsequenceCalculator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/MemoryEfficientLongestCommonSubsequenceCalculator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/Output/DiffOutputBuilderInterface.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/Output/AbstractChunkOutputBuilder.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/Output/DiffOnlyOutputBuilder.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/Output/StrictUnifiedDiffOutputBuilder.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/Output/UnifiedDiffOutputBuilder.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/Parser.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-diff/TimeEfficientLongestCommonSubsequenceCalculator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-environment/Console.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-environment/OperatingSystem.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-environment/Runtime.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-exporter/Exporter.php';
+require 'phar://phpunit-nightly.phar' . '/php-file-iterator/Facade.php';
+require 'phar://phpunit-nightly.phar' . '/php-file-iterator/Factory.php';
+require 'phar://phpunit-nightly.phar' . '/php-file-iterator/Iterator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-global-state/Blacklist.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-global-state/CodeExporter.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-global-state/exceptions/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-global-state/Restorer.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-global-state/exceptions/RuntimeException.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-global-state/Snapshot.php';
+require 'phar://phpunit-nightly.phar' . '/php-invoker/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/php-invoker/Invoker.php';
+require 'phar://phpunit-nightly.phar' . '/php-invoker/TimeoutException.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-object-enumerator/Enumerator.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-object-enumerator/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-object-enumerator/InvalidArgumentException.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-object-reflector/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-object-reflector/InvalidArgumentException.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-object-reflector/ObjectReflector.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-recursion-context/Context.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-recursion-context/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-recursion-context/InvalidArgumentException.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-resource-operations/ResourceOperations.php';
+require 'phar://phpunit-nightly.phar' . '/php-timer/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/php-timer/RuntimeException.php';
+require 'phar://phpunit-nightly.phar' . '/php-timer/Timer.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-type/Type.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-type/CallableType.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-type/exception/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-type/GenericObjectType.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-type/IterableType.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-type/NullType.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-type/ObjectType.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-type/exception/RuntimeException.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-type/SimpleType.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-type/TypeName.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-type/UnknownType.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-type/VoidType.php';
+require 'phar://phpunit-nightly.phar' . '/sebastian-version/Version.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/TextUI/Command.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/TextUI/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/TextUI/Help.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/Printer.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/TextUI/ResultPrinter.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/TextUI/TestRunner.php';
+require 'phar://phpunit-nightly.phar' . '/php-text-template/Template.php';
+require 'phar://phpunit-nightly.phar' . '/theseer-tokenizer/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/theseer-tokenizer/NamespaceUri.php';
+require 'phar://phpunit-nightly.phar' . '/theseer-tokenizer/NamespaceUriException.php';
+require 'phar://phpunit-nightly.phar' . '/theseer-tokenizer/Token.php';
+require 'phar://phpunit-nightly.phar' . '/theseer-tokenizer/TokenCollection.php';
+require 'phar://phpunit-nightly.phar' . '/theseer-tokenizer/TokenCollectionException.php';
+require 'phar://phpunit-nightly.phar' . '/theseer-tokenizer/Tokenizer.php';
+require 'phar://phpunit-nightly.phar' . '/theseer-tokenizer/XMLSerializer.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/Blacklist.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/Color.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/Configuration.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/ConfigurationGenerator.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/ErrorHandler.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/FileLoader.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/Filesystem.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/Filter.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/Getopt.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/GlobalState.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/InvalidArgumentHelper.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/Json.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/Log/JUnit.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/Log/TeamCity.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/PHP/AbstractPhpProcess.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/PHP/DefaultPhpProcess.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/PHP/WindowsPhpProcess.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/RegularExpression.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/Test.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/TestDox/TestDoxPrinter.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/TestDox/CliTestDoxPrinter.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/TestDox/ResultPrinter.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/TestDox/HtmlResultPrinter.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/TestDox/NamePrettifier.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/TestDox/TextResultPrinter.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/TestDox/XmlResultPrinter.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/TextTestListRenderer.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/Type.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/XdebugFilterScriptGenerator.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/Xml.php';
+require 'phar://phpunit-nightly.phar' . '/phpunit/Util/XmlTestListRenderer.php';
+require 'phar://phpunit-nightly.phar' . '/webmozart-assert/Assert.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlockFactoryInterface.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlockFactory.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Description.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/DescriptionFactory.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/ExampleFinder.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Serializer.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/TagFactory.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/StandardTagFactory.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tag.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Factory/StaticMethod.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/BaseTag.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Author.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Covers.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Deprecated.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Example.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Factory/Strategy.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Formatter.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Formatter/AlignFormatter.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Formatter/PassthroughFormatter.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Generic.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Link.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Method.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Param.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Property.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/PropertyRead.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/PropertyWrite.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Reference/Reference.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Reference/Fqsen.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Reference/Url.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Return_.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/See.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Since.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Source.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Throws.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Uses.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Var_.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Version.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-common/Element.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-common/File.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-common/Fqsen.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/FqsenResolver.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-common/Location.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-common/Project.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-reflection-common/ProjectFactory.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Type.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/TypeResolver.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Array_.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Boolean.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Callable_.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Compound.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Context.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/ContextFactory.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Float_.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Integer.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Iterable_.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Mixed_.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Null_.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Nullable.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Object_.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Parent_.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Resource_.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Scalar.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Self_.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Static_.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/String_.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/This.php';
+require 'phar://phpunit-nightly.phar' . '/phpdocumentor-type-resolver/Types/Void_.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/ArgumentsWildcard.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/TokenInterface.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/AnyValueToken.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/AnyValuesToken.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/ApproximateValueToken.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/ArrayCountToken.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/ArrayEntryToken.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/ArrayEveryEntryToken.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/CallbackToken.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/ExactValueToken.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/IdenticalValueToken.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/LogicalAndToken.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/LogicalNotToken.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/ObjectStateToken.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/StringContainsToken.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/TypeToken.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Call/Call.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Call/CallCenter.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Comparator/ClosureComparator.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Comparator/Factory.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Comparator/ProphecyComparator.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/Doubler.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/CachedDoubler.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/ClassPatchInterface.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/DisableConstructorPatch.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/HhvmExceptionPatch.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/KeywordPatch.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/MagicCallPatch.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/ProphecySubjectPatch.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/ReflectionClassNewInstancePatch.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/SplFileInfoPatch.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/ThrowablePatch.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/TraversablePatch.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/DoubleInterface.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/Generator/ClassCodeGenerator.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/Generator/ClassCreator.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/Generator/ClassMirror.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/Generator/Node/ArgumentNode.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/Generator/Node/ClassNode.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/Generator/Node/MethodNode.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/Generator/ReflectionInterface.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/Generator/TypeHintReference.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/LazyDouble.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Doubler/NameGenerator.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Prophecy/ProphecyException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Prophecy/ObjectProphecyException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Call/UnexpectedCallException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/DoublerException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/ClassCreatorException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/ClassMirrorException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/DoubleException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/ClassNotFoundException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/InterfaceNotFoundException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/MethodNotExtendableException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/MethodNotFoundException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/ReturnByReferenceException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/InvalidArgumentException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Prediction/PredictionException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Prediction/AggregateException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Prediction/FailedPredictionException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Prophecy/MethodProphecyException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Prediction/NoCallsException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Prediction/UnexpectedCallsException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Exception/Prediction/UnexpectedCallsCountException.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/PhpDocumentor/MethodTagRetrieverInterface.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/PhpDocumentor/ClassAndInterfaceTagRetriever.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/PhpDocumentor/ClassTagRetriever.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/PhpDocumentor/LegacyClassTagRetriever.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Prediction/PredictionInterface.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Prediction/CallPrediction.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Prediction/CallTimesPrediction.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Prediction/CallbackPrediction.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Prediction/NoCallsPrediction.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Promise/PromiseInterface.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Promise/CallbackPromise.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Promise/ReturnArgumentPromise.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Promise/ReturnPromise.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Promise/ThrowPromise.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Prophecy/MethodProphecy.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Prophecy/ProphecyInterface.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Prophecy/ObjectProphecy.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Prophecy/ProphecySubjectInterface.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Prophecy/RevealerInterface.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Prophecy/Revealer.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Prophet.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Util/ExportUtil.php';
+require 'phar://phpunit-nightly.phar' . '/phpspec-prophecy/Prophecy/Util/StringUtil.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/CodeCoverage.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Exception/Exception.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Exception/RuntimeException.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Exception/CoveredCodeNotExecutedException.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Driver/Driver.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Driver/PCOV.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Driver/PHPDBG.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Driver/Xdebug.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Filter.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Exception/InvalidArgumentException.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Exception/MissingCoversAnnotationException.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Node/AbstractNode.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Node/Builder.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Node/Directory.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Node/File.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Node/Iterator.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Clover.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Crap4j.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Html/Renderer.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Html/Renderer/Dashboard.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Html/Renderer/Directory.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Html/Facade.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Html/Renderer/File.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/PHP.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Text.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Xml/BuildInformation.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Xml/Coverage.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Xml/Node.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Xml/Directory.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Xml/Facade.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Xml/File.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Xml/Method.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Xml/Project.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Xml/Report.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Xml/Source.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Xml/Tests.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Xml/Totals.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Report/Xml/Unit.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Exception/UnintentionallyCoveredCodeException.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Util.php';
+require 'phar://phpunit-nightly.phar' . '/php-code-coverage/Version.php';
+
+if ($execute) {
+    if (isset($printManifest)) {
+        print file_get_contents(__PHPUNIT_PHAR_ROOT__ . '/manifest.txt');
+
+        exit;
+    }
+
+    unset($execute);
+
+    PHPUnit\TextUI\Command::main();
+}
+
+__HALT_COMPILER(); ?>
+¨ø  é         phpunit-nightly.phar    L   doctrine-instantiator/Doctrine/Instantiator/Exception/ExceptionInterface.php»   ≈2,]»   VÆmÃ∂      R   doctrine-instantiator/Doctrine/Instantiator/Exception/InvalidArgumentException.php◊  ≈2,]◊  óÆe˚∂      R   doctrine-instantiator/Doctrine/Instantiator/Exception/UnexpectedValueException.phpä  ≈2,]ä  =8ıÈ∂      <   doctrine-instantiator/Doctrine/Instantiator/Instantiator.php¥  ≈2,]¥  fÃ∂      E   doctrine-instantiator/Doctrine/Instantiator/InstantiatorInterface.phpû  ≈2,]û  çâm∂         doctrine-instantiator/LICENSE$  ≈2,]$  
+ÕÇÂ∂         manifest.txt¶  ≈2,]¶  ∂ä;ñ∂      '   myclabs-deep-copy/DeepCopy/DeepCopy.phpø  ≈2,]ø  ≠Po∂      7   myclabs-deep-copy/DeepCopy/Exception/CloneException.phpá   ≈2,]á   ÷H≈∂      :   myclabs-deep-copy/DeepCopy/Exception/PropertyException.phpÄ   ≈2,]Ä   ñ=úÄ∂      G   myclabs-deep-copy/DeepCopy/Filter/Doctrine/DoctrineCollectionFilter.php@  ≈2,]@  1,∂      L   myclabs-deep-copy/DeepCopy/Filter/Doctrine/DoctrineEmptyCollectionFilter.php;  ≈2,];  K1d∂      B   myclabs-deep-copy/DeepCopy/Filter/Doctrine/DoctrineProxyFilter.phpª  ≈2,]ª  n)K∂      ,   myclabs-deep-copy/DeepCopy/Filter/Filter.phpd  ≈2,]d  ≥M∂      0   myclabs-deep-copy/DeepCopy/Filter/KeepFilter.php(  ≈2,](  9[º∂      3   myclabs-deep-copy/DeepCopy/Filter/ReplaceFilter.php”  ≈2,]”  ÇôÚ∂      3   myclabs-deep-copy/DeepCopy/Filter/SetNullFilter.php'  ≈2,]'  ô©ÑL∂      D   myclabs-deep-copy/DeepCopy/Matcher/Doctrine/DoctrineProxyMatcher.php≈  ≈2,]≈  BÂßç∂      .   myclabs-deep-copy/DeepCopy/Matcher/Matcher.php›   ≈2,]›   ∫ß≥Í∂      6   myclabs-deep-copy/DeepCopy/Matcher/PropertyMatcher.php–  ≈2,]–  ˆÃıü∂      :   myclabs-deep-copy/DeepCopy/Matcher/PropertyNameMatcher.php  ≈2,]  §(Z∂      :   myclabs-deep-copy/DeepCopy/Matcher/PropertyTypeMatcher.phpk  ≈2,]k  r≠ï<∂      :   myclabs-deep-copy/DeepCopy/Reflection/ReflectionHelper.phpT  ≈2,]T  ¡¡™¶∂      A   myclabs-deep-copy/DeepCopy/TypeFilter/Date/DateIntervalFilter.php©  ≈2,]©  µNÆ∂      7   myclabs-deep-copy/DeepCopy/TypeFilter/ReplaceFilter.php0  ≈2,]0  /¯≤∂      ;   myclabs-deep-copy/DeepCopy/TypeFilter/ShallowCopyFilter.php  ≈2,]  ’ﬁa7∂      A   myclabs-deep-copy/DeepCopy/TypeFilter/Spl/SplDoublyLinkedList.phpŸ   ≈2,]Ÿ   n•∑∂      G   myclabs-deep-copy/DeepCopy/TypeFilter/Spl/SplDoublyLinkedListFilter.php`  ≈2,]`  #QKü∂      4   myclabs-deep-copy/DeepCopy/TypeFilter/TypeFilter.php    ≈2,]    íVD∫∂      6   myclabs-deep-copy/DeepCopy/TypeMatcher/TypeMatcher.php›  ≈2,]›  ÑQB≈∂      (   myclabs-deep-copy/DeepCopy/deep_copy.php≤  ≈2,]≤  b≈SŸ∂         myclabs-deep-copy/LICENSE5  ≈2,]5   ≠ÀÑ∂         object-enumerator/LICENSE  ≈2,]  ºf¨Œ∂         object-reflector/LICENSE
+  ≈2,]
+  —F¢˙∂         phar-io-manifest/LICENSEQ  ≈2,]Q  $W0Ê∂      +   phar-io-manifest/ManifestDocumentMapper.phpP  ≈2,]P  I†∂      #   phar-io-manifest/ManifestLoader.php´  ≈2,]´  .}ÊŸ∂      '   phar-io-manifest/ManifestSerializer.phpÈ  ≈2,]È  6√^∂      )   phar-io-manifest/exceptions/Exception.phpv  ≈2,]v  4u_∂      ?   phar-io-manifest/exceptions/InvalidApplicationNameException.php  ≈2,]  >Ùõ	∂      5   phar-io-manifest/exceptions/InvalidEmailException.phpŒ  ≈2,]Œ  %œjõ∂      3   phar-io-manifest/exceptions/InvalidUrlException.phpÃ  ≈2,]Ã  uq¡6∂      9   phar-io-manifest/exceptions/ManifestDocumentException.phpó   ≈2,]ó   "§¶o∂      ?   phar-io-manifest/exceptions/ManifestDocumentMapperException.phpù   ≈2,]ù   €’ëÁ∂      8   phar-io-manifest/exceptions/ManifestElementException.phpñ   ≈2,]ñ   ]√Æº∂      7   phar-io-manifest/exceptions/ManifestLoaderException.phpé   ≈2,]é   ≥æ∆˙∂      '   phar-io-manifest/values/Application.php  ≈2,]  ÃLa`∂      +   phar-io-manifest/values/ApplicationName.php†  ≈2,]†  ™˙Ö∂      "   phar-io-manifest/values/Author.php#  ≈2,]#  [”ö∂      ,   phar-io-manifest/values/AuthorCollection.phpÌ  ≈2,]Ì  ∞#h∂      4   phar-io-manifest/values/AuthorCollectionIterator.phpî  ≈2,]î  ƒ"q1∂      ,   phar-io-manifest/values/BundledComponent.php‘  ≈2,]‘  ÉC„∂      6   phar-io-manifest/values/BundledComponentCollection.phpo  ≈2,]o  –îµ[∂      >   phar-io-manifest/values/BundledComponentCollectionIterator.php  ≈2,]  ùüü]∂      0   phar-io-manifest/values/CopyrightInformation.php∫  ≈2,]∫  §¨0∂      !   phar-io-manifest/values/Email.php  ≈2,]  IdÑr∂      %   phar-io-manifest/values/Extension.php∞  ≈2,]∞  í[&E∂      #   phar-io-manifest/values/Library.php¸  ≈2,]¸  o»∫Ä∂      #   phar-io-manifest/values/License.php9  ≈2,]9  ﬂhe∂      $   phar-io-manifest/values/Manifest.phpx  ≈2,]x  ¸R ∂      3   phar-io-manifest/values/PhpExtensionRequirement.phpÓ  ≈2,]Ó  {âÉR∂      1   phar-io-manifest/values/PhpVersionRequirement.php\  ≈2,]\  æÚùﬁ∂      '   phar-io-manifest/values/Requirement.phpx  ≈2,]x  „DL∂      1   phar-io-manifest/values/RequirementCollection.php.  ≈2,].  ƒØë:∂      9   phar-io-manifest/values/RequirementCollectionIterator.phpÀ  ≈2,]À  ~Ç€ˇ∂          phar-io-manifest/values/Type.phpò  ≈2,]ò  E1'∂         phar-io-manifest/values/Url.phpı  ≈2,]ı  üØ∂      &   phar-io-manifest/xml/AuthorElement.php_  ≈2,]_  º9›∂      0   phar-io-manifest/xml/AuthorElementCollection.php4  ≈2,]4  jeë∂      '   phar-io-manifest/xml/BundlesElement.phpN  ≈2,]N  ‘?∂Ü∂      )   phar-io-manifest/xml/ComponentElement.phpf  ≈2,]f  ÛÚ.˚∂      3   phar-io-manifest/xml/ComponentElementCollection.php:  ≈2,]:  %∫0‰∂      (   phar-io-manifest/xml/ContainsElement.phpX  ≈2,]X  πâ‰ª∂      )   phar-io-manifest/xml/CopyrightElement.phpŸ  ≈2,]Ÿ  ˆc4∂      *   phar-io-manifest/xml/ElementCollection.phpÊ  ≈2,]Ê  ˚ªOÍ∂      #   phar-io-manifest/xml/ExtElement.phpˇ  ≈2,]ˇ  êπ*∂      -   phar-io-manifest/xml/ExtElementCollection.php.  ≈2,].  ÏÚƒñ∂      )   phar-io-manifest/xml/ExtensionElement.phpj  ≈2,]j  “/¬m∂      '   phar-io-manifest/xml/LicenseElement.php\  ≈2,]\  bbº ∂      )   phar-io-manifest/xml/ManifestDocument.php˙  ≈2,]˙  7gΩ∂      9   phar-io-manifest/xml/ManifestDocumentLoadingException.phpK  ≈2,]K  ¨áN∂      (   phar-io-manifest/xml/ManifestElement.php=	  ≈2,]=	  'Ï∂      #   phar-io-manifest/xml/PhpElement.phpÒ  ≈2,]Ò  ([Ù’∂      (   phar-io-manifest/xml/RequiresElement.php/  ≈2,]/  . Té∂         phar-io-version/LICENSE1  ≈2,]1  >≤ª:∂      $   phar-io-version/PreReleaseSuffix.phpk  ≈2,]k  Î¿ã∂         phar-io-version/Version.php
+  ≈2,]
+  ÂÀ>∂      +   phar-io-version/VersionConstraintParser.php◊  ≈2,]◊  ‘ƒ¡8∂      *   phar-io-version/VersionConstraintValue.phpx
+  ≈2,]x
+  ~MU∂      !   phar-io-version/VersionNumber.php4  ≈2,]4  {{∂      9   phar-io-version/constraints/AbstractVersionConstraint.php  ≈2,]  lfÊÊ∂      9   phar-io-version/constraints/AndVersionConstraintGroup.phph  ≈2,]h  	Zéú∂      4   phar-io-version/constraints/AnyVersionConstraint.php»  ≈2,]»  "Lù*∂      6   phar-io-version/constraints/ExactVersionConstraint.phpñ  ≈2,]ñ  ‘±.∂      E   phar-io-version/constraints/GreaterThanOrEqualToVersionConstraint.phpU  ≈2,]U  ¥hÎØ∂      8   phar-io-version/constraints/OrVersionConstraintGroup.phpf  ≈2,]f  1b)u∂      F   phar-io-version/constraints/SpecificMajorAndMinorVersionConstraint.phpó  ≈2,]ó  6ì4∂      >   phar-io-version/constraints/SpecificMajorVersionConstraint.php≤  ≈2,]≤  €…‡ö∂      1   phar-io-version/constraints/VersionConstraint.phpT  ≈2,]T  %˛‘¯∂      (   phar-io-version/exceptions/Exception.phpt  ≈2,]t  9$™4∂      ?   phar-io-version/exceptions/InvalidPreReleaseSuffixException.phpï   ≈2,]ï   ãÖÂä∂      6   phar-io-version/exceptions/InvalidVersionException.phpõ   ≈2,]õ   íÂ≤X∂      D   phar-io-version/exceptions/UnsupportedVersionConstraintException.phpŸ  ≈2,]Ÿ  ≤0Oô∂      "   php-code-coverage/CodeCoverage.phpas  ≈2,]as  £eÑ>∂      #   php-code-coverage/Driver/Driver.php  ≈2,]  /≥Ô∂      !   php-code-coverage/Driver/PCOV.phpÛ  ≈2,]Û  |m¨Œ∂      #   php-code-coverage/Driver/PHPDBG.php”
+  ≈2,]”
+  ¸-b®∂      #   php-code-coverage/Driver/Xdebug.php=  ≈2,]=  	ìÌl∂      ?   php-code-coverage/Exception/CoveredCodeNotExecutedException.php  ≈2,]  Èû∂      )   php-code-coverage/Exception/Exception.phpò  ≈2,]ò  ô≥€≤∂      8   php-code-coverage/Exception/InvalidArgumentException.php∏  ≈2,]∏  ‹*Äò∂      @   php-code-coverage/Exception/MissingCoversAnnotationException.phpÙ  ≈2,]Ù  ˘úU§∂      0   php-code-coverage/Exception/RuntimeException.php™  ≈2,]™  ∂      C   php-code-coverage/Exception/UnintentionallyCoveredCodeException.phpk  ≈2,]k  J/t&∂         php-code-coverage/Filter.php'  ≈2,]'  Õ&»∂         php-code-coverage/LICENSE  ≈2,]  òÿIR∂      '   php-code-coverage/Node/AbstractNode.php‡  ≈2,]‡  É·YØ∂      "   php-code-coverage/Node/Builder.phpx  ≈2,]x  Ä§––∂      $   php-code-coverage/Node/Directory.php˘#  ≈2,]˘#  ≠!∂         php-code-coverage/Node/File.php6:  ≈2,]6:  cëP3∂      #   php-code-coverage/Node/Iterator.php©  ≈2,]©  %¿ﬁ@∂      #   php-code-coverage/Report/Clover.php«&  ≈2,]«&  ò¯ù∂      #   php-code-coverage/Report/Crap4j.php+  ≈2,]+  ÄìB+∂      (   php-code-coverage/Report/Html/Facade.phpÔ  ≈2,]Ô  ç¸U∂      *   php-code-coverage/Report/Html/Renderer.phpy  ≈2,]y  !!∂      4   php-code-coverage/Report/Html/Renderer/Dashboard.php¢  ≈2,]¢  OM∞Ö∂      4   php-code-coverage/Report/Html/Renderer/Directory.phpj  ≈2,]j  Cp¶¿∂      /   php-code-coverage/Report/Html/Renderer/File.phpÄ>  ≈2,]Ä>  q˘ìú∂      F   php-code-coverage/Report/Html/Renderer/Template/coverage_bar.html.dist'  ≈2,]'  ıO}∂      E   php-code-coverage/Report/Html/Renderer/Template/css/bootstrap.min.cssn` ≈2,]n` ıñ˚∂      >   php-code-coverage/Report/Html/Renderer/Template/css/custom.css    ≈2,]        ∂      A   php-code-coverage/Report/Html/Renderer/Template/css/nv.d3.min.cssX%  ≈2,]X%  Å0,∂      @   php-code-coverage/Report/Html/Renderer/Template/css/octicons.cssX   ≈2,]X   '#Ô∂      =   php-code-coverage/Report/Html/Renderer/Template/css/style.cssâ  ≈2,]â  æ›v∂      C   php-code-coverage/Report/Html/Renderer/Template/dashboard.html.distG  ≈2,]G  ‰ƒl∂      C   php-code-coverage/Report/Html/Renderer/Template/directory.html.distÃ  ≈2,]Ã  G…M≥∂      H   php-code-coverage/Report/Html/Renderer/Template/directory_item.html.distA  ≈2,]A  ds∂      >   php-code-coverage/Report/Html/Renderer/Template/file.html.dist
+  ≈2,]
+  Óf"∂      C   php-code-coverage/Report/Html/Renderer/Template/file_item.html.distt  ≈2,]t  ÿøÍ∂      C   php-code-coverage/Report/Html/Renderer/Template/icons/file-code.svg0  ≈2,]0  ŸQUU∂      H   php-code-coverage/Report/Html/Renderer/Template/icons/file-directory.svgÍ   ≈2,]Í   ˝⁄Zˇ∂      C   php-code-coverage/Report/Html/Renderer/Template/js/bootstrap.min.js‰€  ≈2,]‰€  ÉÖÌ"∂      <   php-code-coverage/Report/Html/Renderer/Template/js/d3.min.js≠P ≈2,]≠P ≈hÈb∂      :   php-code-coverage/Report/Html/Renderer/Template/js/file.js˘  ≈2,]˘  bÅ‰Ü∂      @   php-code-coverage/Report/Html/Renderer/Template/js/jquery.min.jsèS ≈2,]èS Ñ[ö`∂      ?   php-code-coverage/Report/Html/Renderer/Template/js/nv.d3.min.js⁄R ≈2,]⁄R <Ms∂      @   php-code-coverage/Report/Html/Renderer/Template/js/popper.min.jsqO  ≈2,]qO  Øv/Õ∂      E   php-code-coverage/Report/Html/Renderer/Template/method_item.html.distÇ  ≈2,]Ç  ÜÓs:∂          php-code-coverage/Report/PHP.php  ≈2,]  Ω \∂      !   php-code-coverage/Report/Text.phpm  ≈2,]m  CçQ‰∂      1   php-code-coverage/Report/Xml/BuildInformation.phpG	  ≈2,]G	  "∂      )   php-code-coverage/Report/Xml/Coverage.phpß  ≈2,]ß  ÿQt∂      *   php-code-coverage/Report/Xml/Directory.phpù  ≈2,]ù  ä¸∂      '   php-code-coverage/Report/Xml/Facade.phpÿ   ≈2,]ÿ   ˜§)√∂      %   php-code-coverage/Report/Xml/File.phpX  ≈2,]X  V¥˘c∂      '   php-code-coverage/Report/Xml/Method.php“  ≈2,]“  Eí‹⁄∂      %   php-code-coverage/Report/Xml/Node.phpæ  ≈2,]æ  N˙lß∂      (   php-code-coverage/Report/Xml/Project.php€  ≈2,]€  ÜÊ∂      '   php-code-coverage/Report/Xml/Report.php'
+  ≈2,]'
+  0D∂      '   php-code-coverage/Report/Xml/Source.phpF  ≈2,]F  dô˘H∂      &   php-code-coverage/Report/Xml/Tests.php(  ≈2,](  ø†nã∂      '   php-code-coverage/Report/Xml/Totals.phpe  ≈2,]e  82Çò∂      %   php-code-coverage/Report/Xml/Unit.php”	  ≈2,]”	  'poë∂         php-code-coverage/Util.phpc  ≈2,]c  ßΩæa∂         php-code-coverage/Version.php·  ≈2,]·  a´$∂         php-file-iterator/Facade.phpË	  ≈2,]Ë	  ±t]◊∂         php-file-iterator/Factory.php,  ≈2,],  Œ¥‹∂         php-file-iterator/Iterator.phpÕ
+  ≈2,]Õ
+  ﬁfáÍ∂         php-file-iterator/LICENSE  ≈2,]  JﬂU(∂         php-invoker/Exception.phpI  ≈2,]I  âûpÔ∂         php-invoker/Invoker.phpC  ≈2,]C  œ∂          php-invoker/TimeoutException.php§  ≈2,]§  e+i∂         php-text-template/LICENSE  ≈2,]  SÒ:¸∂         php-text-template/Template.phpò  ≈2,]ò  ˜⁄æü∂         php-timer/Exception.phpM  ≈2,]M  {Ô^∂         php-timer/LICENSE  ≈2,]  ]Uté∂         php-timer/RuntimeException.php¶  ≈2,]¶  ≥PC∂         php-timer/Timer.phpy	  ≈2,]y	  ©
+‡À∂         php-token-stream/LICENSE  ≈2,]  Îñói∂         php-token-stream/Token.phpëò  ≈2,]ëò  Ÿ&Ñ˜∂      !   php-token-stream/Token/Stream.php“8  ≈2,]“8  Å≠h(∂      0   php-token-stream/Token/Stream/CachingFactory.php`  ≈2,]`  ≠º∑∂         php-token-stream/Token/Util.php   ≈2,]   ¢(i∂      +   phpdocumentor-reflection-common/Element.php9  ≈2,]9  =ﬂ¯∂      (   phpdocumentor-reflection-common/File.php=  ≈2,]=  vç<∑∂      )   phpdocumentor-reflection-common/Fqsen.phpæ  ≈2,]æ  Taf«∂      '   phpdocumentor-reflection-common/LICENSE9  ≈2,]9  *2»ê∂      ,   phpdocumentor-reflection-common/Location.phpJ  ≈2,]J  ≈Ã∂      +   phpdocumentor-reflection-common/Project.php  ≈2,]  @<∂&∂      2   phpdocumentor-reflection-common/ProjectFactory.phpà  ≈2,]à  ]öU›∂      .   phpdocumentor-reflection-docblock/DocBlock.phpn  ≈2,]n  L˜J±∂      :   phpdocumentor-reflection-docblock/DocBlock/Description.phpÀ  ≈2,]À  ∏ÖaÉ∂      A   phpdocumentor-reflection-docblock/DocBlock/DescriptionFactory.phpÏ  ≈2,]Ï  ¨ÑŒ∂      <   phpdocumentor-reflection-docblock/DocBlock/ExampleFinder.php‘  ≈2,]‘  sUy„∂      9   phpdocumentor-reflection-docblock/DocBlock/Serializer.php√  ≈2,]√  ÌPZD∂      A   phpdocumentor-reflection-docblock/DocBlock/StandardTagFactory.php∏/  ≈2,]∏/  wäôF∂      2   phpdocumentor-reflection-docblock/DocBlock/Tag.php±  ≈2,]±  =Kπ¬∂      9   phpdocumentor-reflection-docblock/DocBlock/TagFactory.php7  ≈2,]7  ∏âË∂      :   phpdocumentor-reflection-docblock/DocBlock/Tags/Author.phpò
+  ≈2,]ò
+  ãˇQ÷∂      ;   phpdocumentor-reflection-docblock/DocBlock/Tags/BaseTag.phpS  ≈2,]S  Ù®Ò<∂      :   phpdocumentor-reflection-docblock/DocBlock/Tags/Covers.phpÜ	  ≈2,]Ü	  ∑¸E∂      >   phpdocumentor-reflection-docblock/DocBlock/Tags/Deprecated.php~  ≈2,]~  §iO∂      ;   phpdocumentor-reflection-docblock/DocBlock/Tags/Example.phpû  ≈2,]û  ‚yâ∂      H   phpdocumentor-reflection-docblock/DocBlock/Tags/Factory/StaticMethod.phpﬂ  ≈2,]ﬂ  a±?Í∂      D   phpdocumentor-reflection-docblock/DocBlock/Tags/Factory/Strategy.php‘  ≈2,]‘  D≥Ö∂      =   phpdocumentor-reflection-docblock/DocBlock/Tags/Formatter.php›  ≈2,]›  /åÆ∂      L   phpdocumentor-reflection-docblock/DocBlock/Tags/Formatter/AlignFormatter.phpo  ≈2,]o  7Ow∂      R   phpdocumentor-reflection-docblock/DocBlock/Tags/Formatter/PassthroughFormatter.phpü  ≈2,]ü  ˙Èt•∂      ;   phpdocumentor-reflection-docblock/DocBlock/Tags/Generic.phpâ  ≈2,]â  »íÌ$∂      8   phpdocumentor-reflection-docblock/DocBlock/Tags/Link.phpõ  ≈2,]õ  .‚¢·∂      :   phpdocumentor-reflection-docblock/DocBlock/Tags/Method.php  ≈2,]  ¡œﬂP∂      9   phpdocumentor-reflection-docblock/DocBlock/Tags/Param.php˚  ≈2,]˚  —ˇ£[∂      <   phpdocumentor-reflection-docblock/DocBlock/Tags/Property.php;  ≈2,];  .Îq∂      @   phpdocumentor-reflection-docblock/DocBlock/Tags/PropertyRead.phpI  ≈2,]I  ¸ ∑1∂      A   phpdocumentor-reflection-docblock/DocBlock/Tags/PropertyWrite.phpL  ≈2,]L  ípá©∂      C   phpdocumentor-reflection-docblock/DocBlock/Tags/Reference/Fqsen.php  ≈2,]  «ÍV∂      G   phpdocumentor-reflection-docblock/DocBlock/Tags/Reference/Reference.php4  ≈2,]4  GàÄT∂      A   phpdocumentor-reflection-docblock/DocBlock/Tags/Reference/Url.phpÆ  ≈2,]Æ  ãvù“∂      ;   phpdocumentor-reflection-docblock/DocBlock/Tags/Return_.php·  ≈2,]·  µ”ø$∂      7   phpdocumentor-reflection-docblock/DocBlock/Tags/See.phpΩ  ≈2,]Ω  tï∂      9   phpdocumentor-reflection-docblock/DocBlock/Tags/Since.php  ≈2,]  ˆn5¶∂      :   phpdocumentor-reflection-docblock/DocBlock/Tags/Source.phpª  ≈2,]ª  Èı3
+∂      :   phpdocumentor-reflection-docblock/DocBlock/Tags/Throws.php‡  ≈2,]‡  ıEÉù∂      8   phpdocumentor-reflection-docblock/DocBlock/Tags/Uses.phpã	  ≈2,]ã	  j—Äé∂      8   phpdocumentor-reflection-docblock/DocBlock/Tags/Var_.phpS  ≈2,]S  ¯˝˘∂      ;   phpdocumentor-reflection-docblock/DocBlock/Tags/Version.phpŸ
+  ≈2,]Ÿ
+  xwÌ“∂      5   phpdocumentor-reflection-docblock/DocBlockFactory.php:&  ≈2,]:&  ˛sW~∂      >   phpdocumentor-reflection-docblock/DocBlockFactoryInterface.phpm  ≈2,]m  P*ïò∂      )   phpdocumentor-reflection-docblock/LICENSE8  ≈2,]8  ·â ∂      -   phpdocumentor-type-resolver/FqsenResolver.phpÒ	  ≈2,]Ò	  Î®¬∂      #   phpdocumentor-type-resolver/LICENSE8  ≈2,]8  ·â ∂      $   phpdocumentor-type-resolver/Type.phpπ  ≈2,]π  ≤ﬂK∂      ,   phpdocumentor-type-resolver/TypeResolver.phpn(  ≈2,]n(  ë^∫h∂      ,   phpdocumentor-type-resolver/Types/Array_.phpa	  ≈2,]a	  ÖoJD∂      -   phpdocumentor-type-resolver/Types/Boolean.phpı  ≈2,]ı  ‘ˇz|∂      /   phpdocumentor-type-resolver/Types/Callable_.php¸  ≈2,]¸  R≈t–∂      .   phpdocumentor-type-resolver/Types/Compound.phpi	  ≈2,]i	  tÆ•£∂      -   phpdocumentor-type-resolver/Types/Context.phpB  ≈2,]B  ﬂŒ∂      4   phpdocumentor-type-resolver/Types/ContextFactory.php„  ≈2,]„  ’2Ñå∂      ,   phpdocumentor-type-resolver/Types/Float_.phpÓ  ≈2,]Ó  ß„”Å∂      -   phpdocumentor-type-resolver/Types/Integer.phpø  ≈2,]ø  t†ùŒ∂      /   phpdocumentor-type-resolver/Types/Iterable_.php˘  ≈2,]˘  yP¶/∂      ,   phpdocumentor-type-resolver/Types/Mixed_.php  ≈2,]  ﬁiäT∂      +   phpdocumentor-type-resolver/Types/Null_.php˘  ≈2,]˘  π6MJ∂      .   phpdocumentor-type-resolver/Types/Nullable.php  ≈2,]  XËo‚∂      -   phpdocumentor-type-resolver/Types/Object_.phpÓ  ≈2,]Ó  ≤8”!∂      -   phpdocumentor-type-resolver/Types/Parent_.phpe  ≈2,]e  
+n≠›∂      /   phpdocumentor-type-resolver/Types/Resource_.php   ≈2,]   }®√F∂      ,   phpdocumentor-type-resolver/Types/Scalar.php5  ≈2,]5  À$DP∂      +   phpdocumentor-type-resolver/Types/Self_.phpM  ≈2,]M  ~∂â∂      -   phpdocumentor-type-resolver/Types/Static_.phpÜ  ≈2,]Ü  W««∂      -   phpdocumentor-type-resolver/Types/String_.php˙  ≈2,]˙  ñH1ÿ∂      *   phpdocumentor-type-resolver/Types/This.php⁄  ≈2,]⁄  €lÇ∂      +   phpdocumentor-type-resolver/Types/Void_.phpà  ≈2,]à  Íﬁ∂         phpspec-prophecy/LICENSE}  ≈2,]}  Ú≈6∂      &   phpspec-prophecy/Prophecy/Argument.phpÎ  ≈2,]Î  _8Dª∂      8   phpspec-prophecy/Prophecy/Argument/ArgumentsWildcard.phpY	  ≈2,]Y	  ∏0?ä∂      :   phpspec-prophecy/Prophecy/Argument/Token/AnyValueToken.php¬  ≈2,]¬  Õ{É‹∂      ;   phpspec-prophecy/Prophecy/Argument/Token/AnyValuesToken.phpÒ  ≈2,]Ò  √'ﬁ`∂      B   phpspec-prophecy/Prophecy/Argument/Token/ApproximateValueToken.php°  ≈2,]°  ı °∂      <   phpspec-prophecy/Prophecy/Argument/Token/ArrayCountToken.phpı  ≈2,]ı  ª/*2∂      <   phpspec-prophecy/Prophecy/Argument/Token/ArrayEntryToken.php—  ≈2,]—  $Ei ∂      A   phpspec-prophecy/Prophecy/Argument/Token/ArrayEveryEntryToken.php›  ≈2,]›  ≤ë™#∂      :   phpspec-prophecy/Prophecy/Argument/Token/CallbackToken.php*  ≈2,]*  Yˇd∂      <   phpspec-prophecy/Prophecy/Argument/Token/ExactValueToken.php  ≈2,]  n¬à ∂      @   phpspec-prophecy/Prophecy/Argument/Token/IdenticalValueToken.php  ≈2,]  +›£∂      <   phpspec-prophecy/Prophecy/Argument/Token/LogicalAndToken.phpD  ≈2,]D  (bLë∂      <   phpspec-prophecy/Prophecy/Argument/Token/LogicalNotToken.phpX  ≈2,]X   5)∂      =   phpspec-prophecy/Prophecy/Argument/Token/ObjectStateToken.phpR
+  ≈2,]R
+  ãqe7∂      @   phpspec-prophecy/Prophecy/Argument/Token/StringContainsToken.php-  ≈2,]-  3x÷D∂      ;   phpspec-prophecy/Prophecy/Argument/Token/TokenInterface.phpç  ≈2,]ç  (nGw∂      6   phpspec-prophecy/Prophecy/Argument/Token/TypeToken.php∂  ≈2,]∂  4ÿ7|∂      '   phpspec-prophecy/Prophecy/Call/Call.phpä  ≈2,]ä  3’3’∂      -   phpspec-prophecy/Prophecy/Call/CallCenter.phpK  ≈2,]K  RìâÒ∂      :   phpspec-prophecy/Prophecy/Comparator/ClosureComparator.phpù  ≈2,]ù  ˚dó>∂      0   phpspec-prophecy/Prophecy/Comparator/Factory.php9  ≈2,]9  bÄÔ[∂      ;   phpspec-prophecy/Prophecy/Comparator/ProphecyComparator.phpµ  ≈2,]µ  QHg∂      3   phpspec-prophecy/Prophecy/Doubler/CachedDoubler.php§  ≈2,]§  ⁄ô„-∂      D   phpspec-prophecy/Prophecy/Doubler/ClassPatch/ClassPatchInterface.php™  ≈2,]™  „«ü∂      H   phpspec-prophecy/Prophecy/Doubler/ClassPatch/DisableConstructorPatch.phpU  ≈2,]U  ï{ü∂      C   phpspec-prophecy/Prophecy/Doubler/ClassPatch/HhvmExceptionPatch.php.  ≈2,].  ´ºY¶∂      =   phpspec-prophecy/Prophecy/Doubler/ClassPatch/KeywordPatch.phpQ	  ≈2,]Q	  J-*∂      ?   phpspec-prophecy/Prophecy/Doubler/ClassPatch/MagicCallPatch.php¬
+  ≈2,]¬
+  ªHˆ\∂      E   phpspec-prophecy/Prophecy/Doubler/ClassPatch/ProphecySubjectPatch.php÷  ≈2,]÷  wCI∂      P   phpspec-prophecy/Prophecy/Doubler/ClassPatch/ReflectionClassNewInstancePatch.phpÀ  ≈2,]À  ¿£Hv∂      A   phpspec-prophecy/Prophecy/Doubler/ClassPatch/SplFileInfoPatch.php/  ≈2,]/  ﬂÀ	´∂      ?   phpspec-prophecy/Prophecy/Doubler/ClassPatch/ThrowablePatch.phpˆ	  ≈2,]ˆ	  £‰£∂      A   phpspec-prophecy/Prophecy/Doubler/ClassPatch/TraversablePatch.php
+  ≈2,]
+  ˙I≈∂      5   phpspec-prophecy/Prophecy/Doubler/DoubleInterface.php·  ≈2,]·  Bˇù€∂      -   phpspec-prophecy/Prophecy/Doubler/Doubler.php3  ≈2,]3  ÌR'$∂      B   phpspec-prophecy/Prophecy/Doubler/Generator/ClassCodeGenerator.php  ≈2,]  cÕ7’∂      <   phpspec-prophecy/Prophecy/Doubler/Generator/ClassCreator.php˘  ≈2,]˘  !1˙∂      ;   phpspec-prophecy/Prophecy/Doubler/Generator/ClassMirror.php@  ≈2,]@  g~∏∂      A   phpspec-prophecy/Prophecy/Doubler/Generator/Node/ArgumentNode.php≥  ≈2,]≥  †Y˚ˆ∂      >   phpspec-prophecy/Prophecy/Doubler/Generator/Node/ClassNode.phpØ  ≈2,]Ø  Ç<ÈC∂      ?   phpspec-prophecy/Prophecy/Doubler/Generator/Node/MethodNode.php˘  ≈2,]˘  BÂY”∂      C   phpspec-prophecy/Prophecy/Doubler/Generator/ReflectionInterface.phpÒ  ≈2,]Ò  	Y∂      A   phpspec-prophecy/Prophecy/Doubler/Generator/TypeHintReference.phpÌ  ≈2,]Ì  ‡Áhˆ∂      0   phpspec-prophecy/Prophecy/Doubler/LazyDouble.phpB  ≈2,]B  œ=˛∂      3   phpspec-prophecy/Prophecy/Doubler/NameGenerator.phpä  ≈2,]ä  8S÷à∂      D   phpspec-prophecy/Prophecy/Exception/Call/UnexpectedCallException.php‡  ≈2,]‡  e€ÛN∂      E   phpspec-prophecy/Prophecy/Exception/Doubler/ClassCreatorException.phpÌ  ≈2,]Ì  ç∂      D   phpspec-prophecy/Prophecy/Exception/Doubler/ClassMirrorException.php¬  ≈2,]¬  Ò–éT∂      F   phpspec-prophecy/Prophecy/Exception/Doubler/ClassNotFoundException.php›  ≈2,]›  Ô>¬Ì∂      ?   phpspec-prophecy/Prophecy/Exception/Doubler/DoubleException.phpƒ  ≈2,]ƒ  áåC≥∂      @   phpspec-prophecy/Prophecy/Exception/Doubler/DoublerException.php©  ≈2,]©  »û¶∂      J   phpspec-prophecy/Prophecy/Exception/Doubler/InterfaceNotFoundException.php˚  ≈2,]˚  &æq∂      L   phpspec-prophecy/Prophecy/Exception/Doubler/MethodNotExtendableException.php›  ≈2,]›  –„[ñ∂      G   phpspec-prophecy/Prophecy/Exception/Doubler/MethodNotFoundException.php˜  ≈2,]˜  Êe:∞∂      J   phpspec-prophecy/Prophecy/Exception/Doubler/ReturnByReferenceException.php£  ≈2,]£  0+5,∂      1   phpspec-prophecy/Prophecy/Exception/Exception.php*  ≈2,]*  (Údë∂      @   phpspec-prophecy/Prophecy/Exception/InvalidArgumentException.php®  ≈2,]®  ıÛ±ô∂      E   phpspec-prophecy/Prophecy/Exception/Prediction/AggregateException.phpK  ≈2,]K  ≤AóC∂      L   phpspec-prophecy/Prophecy/Exception/Prediction/FailedPredictionException.phph  ≈2,]h  ¶≤VÁ∂      C   phpspec-prophecy/Prophecy/Exception/Prediction/NoCallsException.php  ≈2,]  ˙ús∂      F   phpspec-prophecy/Prophecy/Exception/Prediction/PredictionException.phpØ  ≈2,]Ø  Ó$Î¬∂      P   phpspec-prophecy/Prophecy/Exception/Prediction/UnexpectedCallsCountException.php6  ≈2,]6  ≤˝Ï@∂      K   phpspec-prophecy/Prophecy/Exception/Prediction/UnexpectedCallsException.phpv  ≈2,]v  æêÔ∂      H   phpspec-prophecy/Prophecy/Exception/Prophecy/MethodProphecyException.phpT  ≈2,]T  D◊é∂      H   phpspec-prophecy/Prophecy/Exception/Prophecy/ObjectProphecyException.phpE  ≈2,]E  |.Ü∂      B   phpspec-prophecy/Prophecy/Exception/Prophecy/ProphecyException.php´  ≈2,]´  €»∂      I   phpspec-prophecy/Prophecy/PhpDocumentor/ClassAndInterfaceTagRetriever.php∏  ≈2,]∏  óä˘∆∂      =   phpspec-prophecy/Prophecy/PhpDocumentor/ClassTagRetriever.phpã  ≈2,]ã  )D©n∂      C   phpspec-prophecy/Prophecy/PhpDocumentor/LegacyClassTagRetriever.php∂  ≈2,]∂  Ÿ‰æ∞∂      G   phpspec-prophecy/Prophecy/PhpDocumentor/MethodTagRetrieverInterface.phpÌ  ≈2,]Ì  Æí≥1∂      7   phpspec-prophecy/Prophecy/Prediction/CallPrediction.php	  ≈2,]	  ˆSHﬂ∂      <   phpspec-prophecy/Prophecy/Prediction/CallTimesPrediction.phpV  ≈2,]V  SÀsŒ∂      ;   phpspec-prophecy/Prophecy/Prediction/CallbackPrediction.php¥  ≈2,]¥  êÜóÑ∂      :   phpspec-prophecy/Prophecy/Prediction/NoCallsPrediction.phpÍ  ≈2,]Í  ˛≈Ë¶∂      <   phpspec-prophecy/Prophecy/Prediction/PredictionInterface.php√  ≈2,]√  P›¯ú∂      5   phpspec-prophecy/Prophecy/Promise/CallbackPromise.php´  ≈2,]´  -µì∂      6   phpspec-prophecy/Prophecy/Promise/PromiseInterface.phpo  ≈2,]o  âÏîv∂      ;   phpspec-prophecy/Prophecy/Promise/ReturnArgumentPromise.phpD  ≈2,]D  ò7∂      3   phpspec-prophecy/Prophecy/Promise/ReturnPromise.phpK  ≈2,]K  ∂◊≥˜∂      2   phpspec-prophecy/Prophecy/Promise/ThrowPromise.php{  ≈2,]{  r!{∂      5   phpspec-prophecy/Prophecy/Prophecy/MethodProphecy.php2  ≈2,]2  {i–∂      5   phpspec-prophecy/Prophecy/Prophecy/ObjectProphecy.php4  ≈2,]4  Õ±Ã∂      8   phpspec-prophecy/Prophecy/Prophecy/ProphecyInterface.php+  ≈2,]+  ¥„XÏ∂      ?   phpspec-prophecy/Prophecy/Prophecy/ProphecySubjectInterface.php  ≈2,]  <Å∂      /   phpspec-prophecy/Prophecy/Prophecy/Revealer.phpµ  ≈2,]µ  	îmÄ∂      8   phpspec-prophecy/Prophecy/Prophecy/RevealerInterface.phpG  ≈2,]G  ßWnZ∂      %   phpspec-prophecy/Prophecy/Prophet.phpó  ≈2,]ó  Á∑bh∂      -   phpspec-prophecy/Prophecy/Util/ExportUtil.php!  ≈2,]!  % 5∂      -   phpspec-prophecy/Prophecy/Util/StringUtil.phpú
+  ≈2,]ú
+  ¶/ü∂         phpunit.xsdôB  ≈2,]ôB  ∑´O∂         phpunit/Exception.phpå  ≈2,]å  zOÍ¢∂         phpunit/Framework/Assert.phpŸ¶ ≈2,]Ÿ¶ {˘c2∂      &   phpunit/Framework/Assert/Functions.phpç$ ≈2,]ç$ Ï’∂      ,   phpunit/Framework/Constraint/ArrayHasKey.php  ≈2,]  B¶ˇ'∂      ,   phpunit/Framework/Constraint/ArraySubset.php  ≈2,]  !ÿ∂      *   phpunit/Framework/Constraint/Attribute.phpµ  ≈2,]µ  ˇR›∂      )   phpunit/Framework/Constraint/Callback.php=  ≈2,]=  cdn¶∂      2   phpunit/Framework/Constraint/ClassHasAttribute.php  ≈2,]  kÃ–ñ∂      8   phpunit/Framework/Constraint/ClassHasStaticAttribute.phpØ  ≈2,]Ø  e◊’∂      *   phpunit/Framework/Constraint/Composite.php}  ≈2,]}  ÿ:q∂      +   phpunit/Framework/Constraint/Constraint.phpz  ≈2,]z  dÿò∂      &   phpunit/Framework/Constraint/Count.phpØ  ≈2,]Ø  ;{z∂      0   phpunit/Framework/Constraint/DirectoryExists.phpi  ≈2,]i  @ÄúÔ∂      *   phpunit/Framework/Constraint/Exception.phps  ≈2,]s  Ãl-∂      .   phpunit/Framework/Constraint/ExceptionCode.php,  ≈2,],  ÃVíú∂      1   phpunit/Framework/Constraint/ExceptionMessage.phpÓ  ≈2,]Ó  YÜ>(∂      B   phpunit/Framework/Constraint/ExceptionMessageRegularExpression.php8  ≈2,]8   £B#∂      +   phpunit/Framework/Constraint/FileExists.phpZ  ≈2,]Z  cdÄ∂      ,   phpunit/Framework/Constraint/GreaterThan.php⁄  ≈2,]⁄  ÇM_H∂      +   phpunit/Framework/Constraint/IsAnything.php@  ≈2,]@  ñ0ìR∂      (   phpunit/Framework/Constraint/IsEmpty.php,  ≈2,],  H°”ˆ∂      (   phpunit/Framework/Constraint/IsEqual.php®  ≈2,]®  i´ú∂      (   phpunit/Framework/Constraint/IsFalse.phpS  ≈2,]S  î∂      )   phpunit/Framework/Constraint/IsFinite.phpW  ≈2,]W  3ß˝∂      ,   phpunit/Framework/Constraint/IsIdentical.php¸  ≈2,]¸  ∂Õ…¥∂      +   phpunit/Framework/Constraint/IsInfinite.php_  ≈2,]_  è¥Éy∂      -   phpunit/Framework/Constraint/IsInstanceOf.php]  ≈2,]]  ¨®e∂      '   phpunit/Framework/Constraint/IsJson.php  ≈2,]  –iu◊∂      &   phpunit/Framework/Constraint/IsNan.phpK  ≈2,]K  ç‚4{∂      '   phpunit/Framework/Constraint/IsNull.phpN  ≈2,]N  GoâÃ∂      +   phpunit/Framework/Constraint/IsReadable.phpc  ≈2,]c  ‡Òo«∂      '   phpunit/Framework/Constraint/IsTrue.phpO  ≈2,]O  …}∞≈∂      '   phpunit/Framework/Constraint/IsType.phpë  ≈2,]ë  l+#:∂      +   phpunit/Framework/Constraint/IsWritable.phpc  ≈2,]c  µë˝∂      ,   phpunit/Framework/Constraint/JsonMatches.phpj  ≈2,]j  ”‡à∂      @   phpunit/Framework/Constraint/JsonMatchesErrorMessageProvider.php?  ≈2,]?  ØnÍ≤∂      )   phpunit/Framework/Constraint/LessThan.php—  ≈2,]—  ZÉU:∂      +   phpunit/Framework/Constraint/LogicalAnd.phpp  ≈2,]p  jF* ∂      +   phpunit/Framework/Constraint/LogicalNot.phpï  ≈2,]ï  ˘—¥∂      *   phpunit/Framework/Constraint/LogicalOr.php  ≈2,]  … Ù¢∂      +   phpunit/Framework/Constraint/LogicalXor.phpÑ  ≈2,]Ñ  ¶¸NÑ∂      3   phpunit/Framework/Constraint/ObjectHasAttribute.phpÉ  ≈2,]É  :ÁèX∂      2   phpunit/Framework/Constraint/RegularExpression.php2  ≈2,]2  ïkßÔ∂      )   phpunit/Framework/Constraint/SameSize.phpË  ≈2,]Ë  µä©ë∂      /   phpunit/Framework/Constraint/StringContains.php≈  ≈2,]≈  ?qÌ†∂      /   phpunit/Framework/Constraint/StringEndsWith.phpn  ≈2,]n  Â¬˛o∂      ?   phpunit/Framework/Constraint/StringMatchesFormatDescription.phpo	  ≈2,]o	  ÌØÎJ∂      1   phpunit/Framework/Constraint/StringStartsWith.php  ≈2,]  %Ò^∂      4   phpunit/Framework/Constraint/TraversableContains.php;  ≈2,];  æ Î∂      8   phpunit/Framework/Constraint/TraversableContainsOnly.phpΩ  ≈2,]Ω  ß~$ó∂      +   phpunit/Framework/DataProviderTestSuite.phpw  ≈2,]w  c4± ∂      4   phpunit/Framework/Exception/AssertionFailedError.phpì  ≈2,]ì  ”¬‡∂      5   phpunit/Framework/Exception/CodeCoverageException.php√  ≈2,]√  µ£[Ë∂      ?   phpunit/Framework/Exception/CoveredCodeNotExecutedException.phpÿ  ≈2,]ÿ  8Y…–∂      %   phpunit/Framework/Exception/Error.php§  ≈2,]§  ]ê#∂      )   phpunit/Framework/Exception/Exception.phpa	  ≈2,]a	   k˜R∂      :   phpunit/Framework/Exception/ExpectationFailedException.php  ≈2,]  íp2∂      3   phpunit/Framework/Exception/IncompleteTestError.phpˇ  ≈2,]ˇ  ◊ùí‹∂      <   phpunit/Framework/Exception/InvalidCoversTargetException.php‹  ≈2,]‹  oñËã∂      <   phpunit/Framework/Exception/InvalidDataProviderException.php–  ≈2,]–  .⁄ú…∂      @   phpunit/Framework/Exception/MissingCoversAnnotationException.phpŸ  ≈2,]Ÿ  |êÓ∂      +   phpunit/Framework/Exception/OutputError.php   ≈2,]   ©ù¢∂      8   phpunit/Framework/Exception/PHPTAssertionFailedError.php4  ≈2,]4  #M∂      .   phpunit/Framework/Exception/RiskyTestError.php«  ≈2,]«  *√y∂      0   phpunit/Framework/Exception/SkippedTestError.php˘  ≈2,]˘  O~∂      5   phpunit/Framework/Exception/SkippedTestSuiteError.php˛  ≈2,]˛  x´é∂      .   phpunit/Framework/Exception/SyntheticError.php5  ≈2,]5  KáY∂      5   phpunit/Framework/Exception/SyntheticSkippedError.php¯  ≈2,]¯  £ç‘ó∂      ?   phpunit/Framework/Exception/UnintentionallyCoveredCodeError.phpÿ  ≈2,]ÿ  º£∂      '   phpunit/Framework/Exception/Warning.phpå  ≈2,]å  8;´∂      &   phpunit/Framework/ExceptionWrapper.php]  ≈2,]]  ïAÅ∂      $   phpunit/Framework/IncompleteTest.phpõ  ≈2,]õ  juå”∂      (   phpunit/Framework/IncompleteTestCase.php‘  ≈2,]‘  ãbÙ—∂      (   phpunit/Framework/MockObject/Api/Api.phpÈ  ≈2,]È  —´ÅÆ∂      +   phpunit/Framework/MockObject/Api/Method.php´  ≈2,]´  E2∫?∂      6   phpunit/Framework/MockObject/Api/MockedCloneMethod.php)  ≈2,])  £FYf∂      8   phpunit/Framework/MockObject/Api/UnmockedCloneMethod.phpF  ≈2,]F  ‘I®ö∂      1   phpunit/Framework/MockObject/Builder/Identity.phpí  ≈2,]í  ®◊∂      9   phpunit/Framework/MockObject/Builder/InvocationMocker.phpE   ≈2,]E   âø8µ∂      .   phpunit/Framework/MockObject/Builder/Match.phpÒ  ≈2,]Ò  yY=f∂      8   phpunit/Framework/MockObject/Builder/MethodNameMatch.phpk  ≈2,]k  0-x∂      7   phpunit/Framework/MockObject/Builder/NamespaceMatch.php<  ≈2,]<  ä8∂      8   phpunit/Framework/MockObject/Builder/ParametersMatch.php  ≈2,]  Œyto∂      -   phpunit/Framework/MockObject/Builder/Stub.php0  ≈2,]0  Œ:ïl∂      3   phpunit/Framework/MockObject/ConfigurableMethod.phpÿ  ≈2,]ÿ  èc¢∂      A   phpunit/Framework/MockObject/Exception/BadMethodCallException.php  ≈2,]  Œ´˝X∂      Y   phpunit/Framework/MockObject/Exception/ConfigurableMethodsAlreadyInitializedException.php   ≈2,]   …Ö¢W∂      4   phpunit/Framework/MockObject/Exception/Exception.php°  ≈2,]°  ä}I*∂      K   phpunit/Framework/MockObject/Exception/IncompatibleReturnValueException.php  ≈2,]  πÊY∂      ;   phpunit/Framework/MockObject/Exception/RuntimeException.php˜  ≈2,]˜  Ù®_|∂      *   phpunit/Framework/MockObject/Generator.phpHn  ≈2,]Hn  Ö'∂      6   phpunit/Framework/MockObject/Generator/deprecation.tpl;   ≈2,];   O5¯s∂      7   phpunit/Framework/MockObject/Generator/mocked_class.tplê   ≈2,]ê   ÇwZ∂      8   phpunit/Framework/MockObject/Generator/mocked_method.tplL  ≈2,]L  „VÎ∂      =   phpunit/Framework/MockObject/Generator/mocked_method_void.tpl  ≈2,]  ’*°∂      ?   phpunit/Framework/MockObject/Generator/mocked_static_method.tplÓ   ≈2,]Ó    4ÈR∂      9   phpunit/Framework/MockObject/Generator/proxied_method.tplÉ  ≈2,]É  ë¥a∫∂      >   phpunit/Framework/MockObject/Generator/proxied_method_void.tpl|  ≈2,]|  |Ú¶∫∂      6   phpunit/Framework/MockObject/Generator/trait_class.tplQ   ≈2,]Q   ˜<ã»∂      5   phpunit/Framework/MockObject/Generator/wsdl_class.tplÕ   ≈2,]Õ   Ùí±∂      6   phpunit/Framework/MockObject/Generator/wsdl_method.tpl<   ≈2,]<   æ–iâ∂      +   phpunit/Framework/MockObject/Invocation.php‰  ≈2,]‰  -bm.∂      1   phpunit/Framework/MockObject/InvocationMocker.phpD  ≈2,]D  ?«1ñ∂      *   phpunit/Framework/MockObject/Invokable.php  ≈2,]  Ù«√∂      (   phpunit/Framework/MockObject/Matcher.phpb!  ≈2,]b!  äÙÉ∂      8   phpunit/Framework/MockObject/Matcher/AnyInvokedCount.phpÄ  ≈2,]Ä  Z∞Ò«∂      6   phpunit/Framework/MockObject/Matcher/AnyParameters.php  ≈2,]  J˛A∂      >   phpunit/Framework/MockObject/Matcher/ConsecutiveParameters.php=  ≈2,]=  |Í∂      6   phpunit/Framework/MockObject/Matcher/DeferredError.php  ≈2,]  ÁÆ◊ª∂      3   phpunit/Framework/MockObject/Matcher/Invocation.php˜  ≈2,]˜  U1∂      7   phpunit/Framework/MockObject/Matcher/InvokedAtIndex.phpÚ  ≈2,]Ú  ˇ√œ∂      <   phpunit/Framework/MockObject/Matcher/InvokedAtLeastCount.phpø  ≈2,]ø  è%}C∂      ;   phpunit/Framework/MockObject/Matcher/InvokedAtLeastOnce.phpV  ≈2,]V  ¨ˆ¸w∂      ;   phpunit/Framework/MockObject/Matcher/InvokedAtMostCount.php¥  ≈2,]¥  ÏÌ5Q∂      5   phpunit/Framework/MockObject/Matcher/InvokedCount.phpò	  ≈2,]ò	  aÑc∂      8   phpunit/Framework/MockObject/Matcher/InvokedRecorder.php‡  ≈2,]‡  r.™ﬂ∂      3   phpunit/Framework/MockObject/Matcher/MethodName.phpV  ≈2,]V  √é∂k∂      3   phpunit/Framework/MockObject/Matcher/Parameters.php  ≈2,]  ŒXG∂      <   phpunit/Framework/MockObject/Matcher/StatelessInvocation.php  ≈2,]  å∫Ìe∂      ,   phpunit/Framework/MockObject/MockBuilder.php†  ≈2,]†  Ã|A∏∂      *   phpunit/Framework/MockObject/MockClass.php  ≈2,]  X]X«∂      +   phpunit/Framework/MockObject/MockMethod.php+  ≈2,]+  H(Å∑∂      .   phpunit/Framework/MockObject/MockMethodSet.phpÈ  ≈2,]È  Óça∂      +   phpunit/Framework/MockObject/MockObject.phpb  ≈2,]b  )ùP∂      *   phpunit/Framework/MockObject/MockTrait.php˘  ≈2,]˘  © Ÿ∂      )   phpunit/Framework/MockObject/MockType.php…  ≈2,]…  ¨…û∂      %   phpunit/Framework/MockObject/Stub.php∆  ≈2,]∆  i0À!∂      6   phpunit/Framework/MockObject/Stub/ConsecutiveCalls.php!  ≈2,]!  cƒJÜ∂      /   phpunit/Framework/MockObject/Stub/Exception.phpH  ≈2,]H  4õ∂      7   phpunit/Framework/MockObject/Stub/MatcherCollection.php  ≈2,]  s√ïâ∂      4   phpunit/Framework/MockObject/Stub/ReturnArgument.php%  ≈2,]%  2Ãﬂ#∂      4   phpunit/Framework/MockObject/Stub/ReturnCallback.phpé  ≈2,]é  Ú⁄§Æ∂      5   phpunit/Framework/MockObject/Stub/ReturnReference.php8  ≈2,]8  )Öúò∂      0   phpunit/Framework/MockObject/Stub/ReturnSelf.phpR  ≈2,]R  -ã©¡∂      0   phpunit/Framework/MockObject/Stub/ReturnStub.php  ≈2,]  £;¬∂      4   phpunit/Framework/MockObject/Stub/ReturnValueMap.php‹  ≈2,]‹  ú[1z∂      *   phpunit/Framework/MockObject/Stub/Stub.phpd  ≈2,]d  º˜qb∂      +   phpunit/Framework/MockObject/Verifiable.phpÃ  ≈2,]Ã  Ãês∂      $   phpunit/Framework/SelfDescribing.php
+  ≈2,]
+  ¿Œ¬s∂      !   phpunit/Framework/SkippedTest.phpò  ≈2,]ò  πHﬂ∂      %   phpunit/Framework/SkippedTestCase.phpŒ  ≈2,]Œ  3r∂         phpunit/Framework/Test.phpD  ≈2,]D  Ω∫©∂      !   phpunit/Framework/TestBuilder.php  ≈2,]  ßÒ«˙∂         phpunit/Framework/TestCase.phpº ≈2,]º î9K;∂      !   phpunit/Framework/TestFailure.php\  ≈2,]\  A°?j∂      "   phpunit/Framework/TestListener.php¿  ≈2,]¿  5<l¿∂      7   phpunit/Framework/TestListenerDefaultImplementation.php∞  ≈2,]∞  €~∂          phpunit/Framework/TestResult.phplw  ≈2,]lw  ÷åU∂         phpunit/Framework/TestSuite.php+P  ≈2,]+P  ÂJ¶∂      '   phpunit/Framework/TestSuiteIterator.phpi  ≈2,]i  ≤î§≥∂      %   phpunit/Framework/WarningTestCase.phpl  ≈2,]l  Ìã≥B∂      !   phpunit/Runner/BaseTestRunner.php^  ≈2,]^  	:3∂      )   phpunit/Runner/DefaultTestResultCache.phpS  ≈2,]S  jÆ‘∂         phpunit/Runner/Exception.phpÕ  ≈2,]Õ  ES∂      4   phpunit/Runner/Filter/ExcludeGroupFilterIterator.php]  ≈2,]]  íœ†˚∂      !   phpunit/Runner/Filter/Factory.php	  ≈2,]	  ~´™Ò∂      -   phpunit/Runner/Filter/GroupFilterIterator.phpq  ≈2,]q  «u∂      4   phpunit/Runner/Filter/IncludeGroupFilterIterator.php\  ≈2,]\  ùöqÄ∂      ,   phpunit/Runner/Filter/NameFilterIterator.phpÂ  ≈2,]Â  lL@¬∂      /   phpunit/Runner/Hook/AfterIncompleteTestHook.phpƒ  ≈2,]ƒ  Oﬁ∂      )   phpunit/Runner/Hook/AfterLastTestHook.phpä  ≈2,]ä  t"é∂      *   phpunit/Runner/Hook/AfterRiskyTestHook.php∫  ≈2,]∫  îQD∂      ,   phpunit/Runner/Hook/AfterSkippedTestHook.phpæ  ≈2,]æ  …ﬂ¡A∂      /   phpunit/Runner/Hook/AfterSuccessfulTestHook.php≥  ≈2,]≥  wúj ∂      *   phpunit/Runner/Hook/AfterTestErrorHook.php∫  ≈2,]∫  ≤õùÈ∂      ,   phpunit/Runner/Hook/AfterTestFailureHook.phpæ  ≈2,]æ  wù =∂      %   phpunit/Runner/Hook/AfterTestHook.phpd  ≈2,]d  !ÇU˙∂      ,   phpunit/Runner/Hook/AfterTestWarningHook.phpæ  ≈2,]æ  _òA∂      +   phpunit/Runner/Hook/BeforeFirstTestHook.phpé  ≈2,]é  é2:∂      &   phpunit/Runner/Hook/BeforeTestHook.phpî  ≈2,]î  ø√%q∂         phpunit/Runner/Hook/Hook.php-  ≈2,]-  gôjg∂          phpunit/Runner/Hook/TestHook.phpN  ≈2,]N  B⁄∂      +   phpunit/Runner/Hook/TestListenerAdapter.php  ≈2,]  @ÜA∂      &   phpunit/Runner/NullTestResultCache.phpô  ≈2,]ô  æW<™∂         phpunit/Runner/PhptTestCase.php]K  ≈2,]]K  *LÄ∂      '   phpunit/Runner/ResultCacheExtension.php  ≈2,]  ˘π ]∂      *   phpunit/Runner/StandardTestSuiteLoader.php  ≈2,]  zäÃ?∂      "   phpunit/Runner/TestResultCache.php’  ≈2,]’  œK∂      "   phpunit/Runner/TestSuiteLoader.php=  ≈2,]=  I∑’∂      "   phpunit/Runner/TestSuiteSorter.php»3  ≈2,]»3  )ç∂         phpunit/Runner/Version.phpÙ  ≈2,]Ù  ∞ºˆ∂         phpunit/TextUI/Command.phpuì  ≈2,]uì  √√«∂         phpunit/TextUI/Exception.phpÕ  ≈2,]Õ  1’∂         phpunit/TextUI/Help.phpô+  ≈2,]ô+  Ó“ªà∂          phpunit/TextUI/ResultPrinter.phpp8  ≈2,]p8  è$8®∂         phpunit/TextUI/TestRunner.phpÜ…  ≈2,]Ü…  JÎgÜ∂         phpunit/Util/Blacklist.phpÊ  ≈2,]Ê  ∆©∂         phpunit/Util/Color.php≈  ≈2,]≈  ∑s∂         phpunit/Util/Configuration.phpÉ  ≈2,]É  Üê∂      '   phpunit/Util/ConfigurationGenerator.phpõ  ≈2,]õ  ˜œZ∂         phpunit/Util/ErrorHandler.php  ≈2,]  ªs ∂         phpunit/Util/Exception.phpÀ  ≈2,]À  -∂         phpunit/Util/FileLoader.php	  ≈2,]	  ®◊ÇJ∂         phpunit/Util/Filesystem.phpû  ≈2,]û  Ê®[¿∂         phpunit/Util/Filter.php…	  ≈2,]…	  ˝ı˝∂         phpunit/Util/Getopt.phpî  ≈2,]î  Êì>–∂         phpunit/Util/GlobalState.phpÜ  ≈2,]Ü  	-¢q∂      &   phpunit/Util/InvalidArgumentHelper.phpR  ≈2,]R  ˚ü∂ˇ∂         phpunit/Util/Json.php
+  ≈2,]
+  Ç≥OÛ∂         phpunit/Util/Log/JUnit.php.*  ≈2,].*  h :∂         phpunit/Util/Log/TeamCity.php<'  ≈2,]<'  [Ä
+%∂      '   phpunit/Util/PHP/AbstractPhpProcess.php.%  ≈2,].%  °[f‹∂      &   phpunit/Util/PHP/DefaultPhpProcess.php‡  ≈2,]‡  }Í¸∂      *   phpunit/Util/PHP/Template/PhptTestCase.tplb  ≈2,]b  π≠æÃ∂      +   phpunit/Util/PHP/Template/TestCaseClass.tpl!  ≈2,]!  ‹¿˝√∂      ,   phpunit/Util/PHP/Template/TestCaseMethod.tplp  ≈2,]p  ^ï"≈∂      &   phpunit/Util/PHP/WindowsPhpProcess.phpi  ≈2,]i  ï·¥∂         phpunit/Util/PHP/eval-stdin.phpC  ≈2,]C  ®Ìä ∂         phpunit/Util/Printer.php4  ≈2,]4  P6Ç¨∂      "   phpunit/Util/RegularExpression.php5  ≈2,]5  ¸p≠{∂         phpunit/Util/Test.phpö  ≈2,]ö  íòÀ‡∂      *   phpunit/Util/TestDox/CliTestDoxPrinter.phpÛ(  ≈2,]Û(  ¶7kâ∂      *   phpunit/Util/TestDox/HtmlResultPrinter.php
+  ≈2,]
+  ˘–iÏ∂      '   phpunit/Util/TestDox/NamePrettifier.phpA  ≈2,]A  ,ÕI∫∂      &   phpunit/Util/TestDox/ResultPrinter.php>  ≈2,]>  ⁄ÎÚ∂      '   phpunit/Util/TestDox/TestDoxPrinter.phpÃ*  ≈2,]Ã*  Ï—(∂      *   phpunit/Util/TestDox/TextResultPrinter.php=  ≈2,]=  ÒFÆ∂      )   phpunit/Util/TestDox/XmlResultPrinter.php  ≈2,]  ¢äã∂      %   phpunit/Util/TextTestListRenderer.php˘  ≈2,]˘  èùôı∂         phpunit/Util/Type.phpê  ≈2,]ê  $∆∂      ,   phpunit/Util/XdebugFilterScriptGenerator.php#  ≈2,]#  Y3è∂         phpunit/Util/Xml.php§  ≈2,]§  C+Àè∂      $   phpunit/Util/XmlTestListRenderer.php¢	  ≈2,]¢	  ¿‡€'∂      *   sebastian-code-unit-reverse-lookup/LICENSE  ≈2,]  XXﬁÂ∂      -   sebastian-code-unit-reverse-lookup/Wizard.phpc  ≈2,]c  jt∂      (   sebastian-comparator/ArrayComparator.php¥  ≈2,]¥  ŸRI∂      #   sebastian-comparator/Comparator.phpµ  ≈2,]µ  3$ﬂ∂      *   sebastian-comparator/ComparisonFailure.php‚  ≈2,]‚  Û±Ó∂      *   sebastian-comparator/DOMNodeComparator.php“
+  ≈2,]“
+  ígêä∂      +   sebastian-comparator/DateTimeComparator.php^  ≈2,]^  Ë∂      )   sebastian-comparator/DoubleComparator.phpù  ≈2,]ù  ﬂÙ∞-∂      ,   sebastian-comparator/ExceptionComparator.php≈  ≈2,]≈  ÑÏ”™∂          sebastian-comparator/Factory.php\  ≈2,]\  é”T∂         sebastian-comparator/LICENSE	  ≈2,]	  ˘q¶Â∂      -   sebastian-comparator/MockObjectComparator.php}  ≈2,]}  ì¨@b∂      *   sebastian-comparator/NumericComparator.phpL  ≈2,]L  ƒ¨fç∂      )   sebastian-comparator/ObjectComparator.phph  ≈2,]h  “∞∂      +   sebastian-comparator/ResourceComparator.php6  ≈2,]6  zLµ∂      )   sebastian-comparator/ScalarComparator.php¡  ≈2,]¡  r8z∂      3   sebastian-comparator/SplObjectStorageComparator.phpA  ≈2,]A  ¯ˇ.C∂      '   sebastian-comparator/TypeComparator.php  ≈2,]  !OJ√∂         sebastian-diff/Chunk.phpü  ≈2,]ü  #IÎ„∂         sebastian-diff/Diff.php†  ≈2,]†  c¢–∂         sebastian-diff/Differ.php›%  ≈2,]›%  ◊ÚQ∂      3   sebastian-diff/Exception/ConfigurationException.php∆  ≈2,]∆  ÄjÔ	∂      &   sebastian-diff/Exception/Exception.phpI  ≈2,]I  n:mÍ∂      5   sebastian-diff/Exception/InvalidArgumentException.php´  ≈2,]´  " b‡∂         sebastian-diff/LICENSE  ≈2,]  Dte#∂         sebastian-diff/Line.phpL  ≈2,]L  
+Ûq∂      5   sebastian-diff/LongestCommonSubsequenceCalculator.phpF  ≈2,]F  -‚u·∂      D   sebastian-diff/MemoryEfficientLongestCommonSubsequenceCalculator.php(  ≈2,](  1U„û∂      4   sebastian-diff/Output/AbstractChunkOutputBuilder.phpj  ≈2,]j  Fú ∂      /   sebastian-diff/Output/DiffOnlyOutputBuilder.phpó  ≈2,]ó  )ÔÇ√∂      4   sebastian-diff/Output/DiffOutputBuilderInterface.php  ≈2,]  Vé·Â∂      8   sebastian-diff/Output/StrictUnifiedDiffOutputBuilder.php>(  ≈2,]>(  ﬂ‡œ7∂      2   sebastian-diff/Output/UnifiedDiffOutputBuilder.phpk  ≈2,]k  ˇ*ó–∂         sebastian-diff/Parser.php  ≈2,]  HÄÿS∂      B   sebastian-diff/TimeEfficientLongestCommonSubsequenceCalculator.php≈  ≈2,]≈  ?∏É[∂      !   sebastian-environment/Console.php™  ≈2,]™  Æò√h∂         sebastian-environment/LICENSE  ≈2,]  I°∞‚∂      )   sebastian-environment/OperatingSystem.phpä  ≈2,]ä  ∑ŒH>∂      !   sebastian-environment/Runtime.php*  ≈2,]*   'w∂         sebastian-exporter/Exporter.phpÈ!  ≈2,]È!  ÎÌÏ∂         sebastian-exporter/LICENSE  ≈2,]  ÉÅ` ∂      $   sebastian-global-state/Blacklist.php«
+  ≈2,]«
+  …"ñ¡∂      '   sebastian-global-state/CodeExporter.php	  ≈2,]	  Ì?%ú∂         sebastian-global-state/LICENSE  ≈2,]  ?≠Kª∂      #   sebastian-global-state/Restorer.phpÇ  ≈2,]Ç  ≥ø∂      #   sebastian-global-state/Snapshot.phpÈ(  ≈2,]È(  5X≤∂      /   sebastian-global-state/exceptions/Exception.phpX  ≈2,]X  2Ó≤>∂      6   sebastian-global-state/exceptions/RuntimeException.php∑  ≈2,]∑  W˛ºy∂      *   sebastian-object-enumerator/Enumerator.php˘  ≈2,]˘  ‡’Y≈∂      )   sebastian-object-enumerator/Exception.php>  ≈2,]>  àÑåQ∂      8   sebastian-object-enumerator/InvalidArgumentException.php¨  ≈2,]¨  •©¥ã∂      (   sebastian-object-reflector/Exception.phpV  ≈2,]V  iibæ∂      7   sebastian-object-reflector/InvalidArgumentException.php√  ≈2,]√  A∂      .   sebastian-object-reflector/ObjectReflector.phpº  ≈2,]º  N—ê¡∂      '   sebastian-recursion-context/Context.php≤  ≈2,]≤  Üi~∂      )   sebastian-recursion-context/Exception.phpR  ≈2,]R  #3£∂∂      8   sebastian-recursion-context/InvalidArgumentException.php∆  ≈2,]∆  [PÏº∂      #   sebastian-recursion-context/LICENSE  ≈2,]  €À>∂      %   sebastian-resource-operations/LICENSE  ≈2,]  ô…r‰∂      4   sebastian-resource-operations/ResourceOperations.phpﬂ≤  ≈2,]ﬂ≤  ∑¶∂         sebastian-type/CallableType.php¢  ≈2,]¢  ûÆnF∂      $   sebastian-type/GenericObjectType.phpd  ≈2,]d  ≥ıêA∂         sebastian-type/IterableType.phpÀ  ≈2,]À  /√Ê∂         sebastian-type/LICENSE  ≈2,]  $êª1∂         sebastian-type/NullType.php≈  ≈2,]≈  ]Lœ-∂         sebastian-type/ObjectType.phpé  ≈2,]é  [ª∂         sebastian-type/SimpleType.php(  ≈2,](  ñ0çG∂         sebastian-type/Type.php¡	  ≈2,]¡	  IV=∂         sebastian-type/TypeName.php⁄  ≈2,]⁄  ˘‹!±∂         sebastian-type/UnknownType.phpí  ≈2,]í  ,&Ä"∂         sebastian-type/VoidType.phpß  ≈2,]ß  ìÜõ-∂      &   sebastian-type/exception/Exception.phpI  ≈2,]I  ú+bm∂      -   sebastian-type/exception/RuntimeException.php°  ≈2,]°  †rå∂         sebastian-version/LICENSE  ≈2,]  n∂         sebastian-version/Version.phpO  ≈2,]O  $$‚Ë∂         theseer-tokenizer/Exception.phpn   ≈2,]n   π'«∂         theseer-tokenizer/LICENSE¸  ≈2,]¸  ÔR(∂      "   theseer-tokenizer/NamespaceUri.phpà  ≈2,]à  ≈è	∂      +   theseer-tokenizer/NamespaceUriException.phpî   ≈2,]î   >JÜD∂         theseer-tokenizer/Token.phpÇ  ≈2,]Ç  œCíœ∂      %   theseer-tokenizer/TokenCollection.php†
+  ≈2,]†
+  å“∂      .   theseer-tokenizer/TokenCollectionException.phpó   ≈2,]ó   º'pﬁ∂         theseer-tokenizer/Tokenizer.php  ≈2,]  ¨M9ä∂      #   theseer-tokenizer/XMLSerializer.phpd
+  ≈2,]d
+  …BwN∂         webmozart-assert/Assert.phpÊë  ≈2,]Êë  ˜√Î¬∂         webmozart-assert/LICENSE<  ≈2,]<  tÿ}ı∂      <?php
+
+namespace PHPUnit\Doctrine\Instantiator\Exception;
+
+use Throwable;
+/**
+ * Base exception marker interface for the instantiator component
+ */
+interface ExceptionInterface extends \Throwable
+{
+}
+<?php
+
+namespace PHPUnit\Doctrine\Instantiator\Exception;
+
+use InvalidArgumentException as BaseInvalidArgumentException;
+use ReflectionClass;
+use const PHP_VERSION_ID;
+use function interface_exists;
+use function sprintf;
+use function trait_exists;
+/**
+ * Exception for invalid arguments provided to the instantiator
+ */
+class InvalidArgumentException extends \InvalidArgumentException implements \PHPUnit\Doctrine\Instantiator\Exception\ExceptionInterface
+{
+    public static function fromNonExistingClass(string $className) : self
+    {
+        if (\interface_exists($className)) {
+            return new self(\sprintf('The provided type "%s" is an interface, and can not be instantiated', $className));
+        }
+        if (\PHP_VERSION_ID >= 50400 && \trait_exists($className)) {
+            return new self(\sprintf('The provided type "%s" is a trait, and can not be instantiated', $className));
+        }
+        return new self(\sprintf('The provided class "%s" does not exist', $className));
+    }
+    public static function fromAbstractClass(\ReflectionClass $reflectionClass) : self
+    {
+        return new self(\sprintf('The provided class "%s" is abstract, and can not be instantiated', $reflectionClass->getName()));
+    }
+}
+<?php
+
+namespace PHPUnit\Doctrine\Instantiator\Exception;
+
+use Exception;
+use ReflectionClass;
+use UnexpectedValueException as BaseUnexpectedValueException;
+use function sprintf;
+/**
+ * Exception for given parameters causing invalid/unexpected state on instantiation
+ */
+class UnexpectedValueException extends \UnexpectedValueException implements \PHPUnit\Doctrine\Instantiator\Exception\ExceptionInterface
+{
+    public static function fromSerializationTriggeredException(\ReflectionClass $reflectionClass, \Exception $exception) : self
+    {
+        return new self(\sprintf('An exception was raised while trying to instantiate an instance of "%s" via un-serialization', $reflectionClass->getName()), 0, $exception);
+    }
+    public static function fromUncleanUnSerialization(\ReflectionClass $reflectionClass, string $errorString, int $errorCode, string $errorFile, int $errorLine) : self
+    {
+        return new self(\sprintf('Could not produce an instance of "%s" via un-serialization, since an error was triggered ' . 'in file "%s" at line "%d"', $reflectionClass->getName(), $errorFile, $errorLine), 0, new \Exception($errorString, $errorCode));
+    }
+}
+<?php
+
+namespace PHPUnit\Doctrine\Instantiator;
+
+use PHPUnit\Doctrine\Instantiator\Exception\InvalidArgumentException;
+use PHPUnit\Doctrine\Instantiator\Exception\UnexpectedValueException;
+use Exception;
+use ReflectionClass;
+use ReflectionException;
+use function class_exists;
+use function restore_error_handler;
+use function set_error_handler;
+use function sprintf;
+use function strlen;
+use function unserialize;
+/**
+ * {@inheritDoc}
+ */
+final class Instantiator implements \PHPUnit\Doctrine\Instantiator\InstantiatorInterface
+{
+    /**
+     * Markers used internally by PHP to define whether {@see \unserialize} should invoke
+     * the method {@see \Serializable::unserialize()} when dealing with classes implementing
+     * the {@see \Serializable} interface.
+     */
+    public const SERIALIZATION_FORMAT_USE_UNSERIALIZER = 'C';
+    public const SERIALIZATION_FORMAT_AVOID_UNSERIALIZER = 'O';
+    /**
+     * Used to instantiate specific classes, indexed by class name.
+     *
+     * @var callable[]
+     */
+    private static $cachedInstantiators = [];
+    /**
+     * Array of objects that can directly be cloned, indexed by class name.
+     *
+     * @var object[]
+     */
+    private static $cachedCloneables = [];
+    /**
+     * {@inheritDoc}
+     */
+    public function instantiate($className)
+    {
+        if (isset(self::$cachedCloneables[$className])) {
+            return clone self::$cachedCloneables[$className];
+        }
+        if (isset(self::$cachedInstantiators[$className])) {
+            $factory = self::$cachedInstantiators[$className];
+            return $factory();
+        }
+        return $this->buildAndCacheFromFactory($className);
+    }
+    /**
+     * Builds the requested object and caches it in static properties for performance
+     *
+     * @return object
+     */
+    private function buildAndCacheFromFactory(string $className)
+    {
+        $factory = self::$cachedInstantiators[$className] = $this->buildFactory($className);
+        $instance = $factory();
+        if ($this->isSafeToClone(new \ReflectionClass($instance))) {
+            self::$cachedCloneables[$className] = clone $instance;
+        }
+        return $instance;
+    }
+    /**
+     * Builds a callable capable of instantiating the given $className without
+     * invoking its constructor.
+     *
+     * @throws InvalidArgumentException
+     * @throws UnexpectedValueException
+     * @throws ReflectionException
+     */
+    private function buildFactory(string $className) : callable
+    {
+        $reflectionClass = $this->getReflectionClass($className);
+        if ($this->isInstantiableViaReflection($reflectionClass)) {
+            return [$reflectionClass, 'newInstanceWithoutConstructor'];
+        }
+        $serializedString = \sprintf('%s:%d:"%s":0:{}', self::SERIALIZATION_FORMAT_AVOID_UNSERIALIZER, \strlen($className), $className);
+        $this->checkIfUnSerializationIsSupported($reflectionClass, $serializedString);
+        return static function () use($serializedString) {
+            return \unserialize($serializedString);
+        };
+    }
+    /**
+     * @param string $className
+     *
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     */
+    private function getReflectionClass($className) : \ReflectionClass
+    {
+        if (!\class_exists($className)) {
+            throw \PHPUnit\Doctrine\Instantiator\Exception\InvalidArgumentException::fromNonExistingClass($className);
+        }
+        $reflection = new \ReflectionClass($className);
+        if ($reflection->isAbstract()) {
+            throw \PHPUnit\Doctrine\Instantiator\Exception\InvalidArgumentException::fromAbstractClass($reflection);
+        }
+        return $reflection;
+    }
+    /**
+     * @throws UnexpectedValueException
+     */
+    private function checkIfUnSerializationIsSupported(\ReflectionClass $reflectionClass, string $serializedString) : void
+    {
+        \set_error_handler(static function ($code, $message, $file, $line) use($reflectionClass, &$error) : void {
+            $error = \PHPUnit\Doctrine\Instantiator\Exception\UnexpectedValueException::fromUncleanUnSerialization($reflectionClass, $message, $code, $file, $line);
+        });
+        try {
+            $this->attemptInstantiationViaUnSerialization($reflectionClass, $serializedString);
+        } finally {
+            \restore_error_handler();
+        }
+        if ($error) {
+            throw $error;
+        }
+    }
+    /**
+     * @throws UnexpectedValueException
+     */
+    private function attemptInstantiationViaUnSerialization(\ReflectionClass $reflectionClass, string $serializedString) : void
+    {
+        try {
+            \unserialize($serializedString);
+        } catch (\Exception $exception) {
+            throw \PHPUnit\Doctrine\Instantiator\Exception\UnexpectedValueException::fromSerializationTriggeredException($reflectionClass, $exception);
+        }
+    }
+    private function isInstantiableViaReflection(\ReflectionClass $reflectionClass) : bool
+    {
+        return !($this->hasInternalAncestors($reflectionClass) && $reflectionClass->isFinal());
+    }
+    /**
+     * Verifies whether the given class is to be considered internal
+     */
+    private function hasInternalAncestors(\ReflectionClass $reflectionClass) : bool
+    {
+        do {
+            if ($reflectionClass->isInternal()) {
+                return \true;
+            }
+            $reflectionClass = $reflectionClass->getParentClass();
+        } while ($reflectionClass);
+        return \false;
+    }
+    /**
+     * Checks if a class is cloneable
+     *
+     * Classes implementing `__clone` cannot be safely cloned, as that may cause side-effects.
+     */
+    private function isSafeToClone(\ReflectionClass $reflection) : bool
+    {
+        return $reflection->isCloneable() && !$reflection->hasMethod('__clone');
+    }
+}
+<?php
+
+namespace PHPUnit\Doctrine\Instantiator;
+
+use PHPUnit\Doctrine\Instantiator\Exception\ExceptionInterface;
+/**
+ * Instantiator provides utility methods to build objects without invoking their constructors
+ */
+interface InstantiatorInterface
+{
+    /**
+     * @param string $className
+     *
+     * @return object
+     *
+     * @throws ExceptionInterface
+     */
+    public function instantiate($className);
+}
+Copyright (c) 2014 Doctrine Project
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+phpunit/phpunit: master@0bf3d5a4ed8edb6500e4d0aaf1c0c92a75dc3897
+doctrine/instantiator: 1.2.0
+myclabs/deep-copy: 1.9.1
+phar-io/manifest: 1.0.3
+phar-io/version: 2.0.1
+phpdocumentor/reflection-common: 1.0.1
+phpdocumentor/reflection-docblock: 4.3.1
+phpdocumentor/type-resolver: 0.4.0
+phpspec/prophecy: 1.8.1
+phpunit/php-code-coverage: 7.0.6
+phpunit/php-file-iterator: 2.0.2
+phpunit/php-invoker: 2.0.0
+phpunit/php-text-template: 1.2.1
+phpunit/php-timer: 2.1.2
+phpunit/php-token-stream: 3.0.2
+sebastian/code-unit-reverse-lookup: 1.0.1
+sebastian/comparator: 3.0.2
+sebastian/diff: 3.0.2
+sebastian/environment: 4.2.2
+sebastian/exporter: 3.1.0
+sebastian/global-state: 3.0.0
+sebastian/object-enumerator: 3.0.3
+sebastian/object-reflector: 1.1.1
+sebastian/recursion-context: 3.0.0
+sebastian/resource-operations: 2.0.1
+sebastian/type: 1.1.3
+sebastian/version: 2.0.1
+symfony/polyfill-ctype: v1.11.0
+theseer/tokenizer: 1.1.3
+webmozart/assert: 1.4.0
+<?php
+
+namespace PHPUnit\DeepCopy;
+
+use DateInterval;
+use DateTimeInterface;
+use DateTimeZone;
+use PHPUnit\DeepCopy\Exception\CloneException;
+use PHPUnit\DeepCopy\Filter\Filter;
+use PHPUnit\DeepCopy\Matcher\Matcher;
+use PHPUnit\DeepCopy\TypeFilter\Date\DateIntervalFilter;
+use PHPUnit\DeepCopy\TypeFilter\Spl\SplDoublyLinkedListFilter;
+use PHPUnit\DeepCopy\TypeFilter\TypeFilter;
+use PHPUnit\DeepCopy\TypeMatcher\TypeMatcher;
+use ReflectionObject;
+use ReflectionProperty;
+use PHPUnit\DeepCopy\Reflection\ReflectionHelper;
+use SplDoublyLinkedList;
+/**
+ * @final
+ */
+class DeepCopy
+{
+    /**
+     * @var object[] List of objects copied.
+     */
+    private $hashMap = [];
+    /**
+     * Filters to apply.
+     *
+     * @var array Array of ['filter' => Filter, 'matcher' => Matcher] pairs.
+     */
+    private $filters = [];
+    /**
+     * Type Filters to apply.
+     *
+     * @var array Array of ['filter' => Filter, 'matcher' => Matcher] pairs.
+     */
+    private $typeFilters = [];
+    /**
+     * @var bool
+     */
+    private $skipUncloneable = \false;
+    /**
+     * @var bool
+     */
+    private $useCloneMethod;
+    /**
+     * @param bool $useCloneMethod   If set to true, when an object implements the __clone() function, it will be used
+     *                               instead of the regular deep cloning.
+     */
+    public function __construct($useCloneMethod = \false)
+    {
+        $this->useCloneMethod = $useCloneMethod;
+        $this->addTypeFilter(new \PHPUnit\DeepCopy\TypeFilter\Date\DateIntervalFilter(), new \PHPUnit\DeepCopy\TypeMatcher\TypeMatcher(\DateInterval::class));
+        $this->addTypeFilter(new \PHPUnit\DeepCopy\TypeFilter\Spl\SplDoublyLinkedListFilter($this), new \PHPUnit\DeepCopy\TypeMatcher\TypeMatcher(\SplDoublyLinkedList::class));
+    }
+    /**
+     * If enabled, will not throw an exception when coming across an uncloneable property.
+     *
+     * @param $skipUncloneable
+     *
+     * @return $this
+     */
+    public function skipUncloneable($skipUncloneable = \true)
+    {
+        $this->skipUncloneable = $skipUncloneable;
+        return $this;
+    }
+    /**
+     * Deep copies the given object.
+     *
+     * @param mixed $object
+     *
+     * @return mixed
+     */
+    public function copy($object)
+    {
+        $this->hashMap = [];
+        return $this->recursiveCopy($object);
+    }
+    public function addFilter(\PHPUnit\DeepCopy\Filter\Filter $filter, \PHPUnit\DeepCopy\Matcher\Matcher $matcher)
+    {
+        $this->filters[] = ['matcher' => $matcher, 'filter' => $filter];
+    }
+    public function prependFilter(\PHPUnit\DeepCopy\Filter\Filter $filter, \PHPUnit\DeepCopy\Matcher\Matcher $matcher)
+    {
+        \array_unshift($this->filters, ['matcher' => $matcher, 'filter' => $filter]);
+    }
+    public function addTypeFilter(\PHPUnit\DeepCopy\TypeFilter\TypeFilter $filter, \PHPUnit\DeepCopy\TypeMatcher\TypeMatcher $matcher)
+    {
+        $this->typeFilters[] = ['matcher' => $matcher, 'filter' => $filter];
+    }
+    private function recursiveCopy($var)
+    {
+        // Matches Type Filter
+        if ($filter = $this->getFirstMatchedTypeFilter($this->typeFilters, $var)) {
+            return $filter->apply($var);
+        }
+        // Resource
+        if (\is_resource($var)) {
+            return $var;
+        }
+        // Array
+        if (\is_array($var)) {
+            return $this->copyArray($var);
+        }
+        // Scalar
+        if (!\is_object($var)) {
+            return $var;
+        }
+        // Object
+        return $this->copyObject($var);
+    }
+    /**
+     * Copy an array
+     * @param array $array
+     * @return array
+     */
+    private function copyArray(array $array)
+    {
+        foreach ($array as $key => $value) {
+            $array[$key] = $this->recursiveCopy($value);
+        }
+        return $array;
+    }
+    /**
+     * Copies an object.
+     *
+     * @param object $object
+     *
+     * @throws CloneException
+     *
+     * @return object
+     */
+    private function copyObject($object)
+    {
+        $objectHash = \spl_object_hash($object);
+        if (isset($this->hashMap[$objectHash])) {
+            return $this->hashMap[$objectHash];
+        }
+        $reflectedObject = new \ReflectionObject($object);
+        $isCloneable = $reflectedObject->isCloneable();
+        if (\false === $isCloneable) {
+            if ($this->skipUncloneable) {
+                $this->hashMap[$objectHash] = $object;
+                return $object;
+            }
+            throw new \PHPUnit\DeepCopy\Exception\CloneException(\sprintf('The class "%s" is not cloneable.', $reflectedObject->getName()));
+        }
+        $newObject = clone $object;
+        $this->hashMap[$objectHash] = $newObject;
+        if ($this->useCloneMethod && $reflectedObject->hasMethod('__clone')) {
+            return $newObject;
+        }
+        if ($newObject instanceof \DateTimeInterface || $newObject instanceof \DateTimeZone) {
+            return $newObject;
+        }
+        foreach (\PHPUnit\DeepCopy\Reflection\ReflectionHelper::getProperties($reflectedObject) as $property) {
+            $this->copyObjectProperty($newObject, $property);
+        }
+        return $newObject;
+    }
+    private function copyObjectProperty($object, \ReflectionProperty $property)
+    {
+        // Ignore static properties
+        if ($property->isStatic()) {
+            return;
+        }
+        // Apply the filters
+        foreach ($this->filters as $item) {
+            /** @var Matcher $matcher */
+            $matcher = $item['matcher'];
+            /** @var Filter $filter */
+            $filter = $item['filter'];
+            if ($matcher->matches($object, $property->getName())) {
+                $filter->apply($object, $property->getName(), function ($object) {
+                    return $this->recursiveCopy($object);
+                });
+                // If a filter matches, we stop processing this property
+                return;
+            }
+        }
+        $property->setAccessible(\true);
+        $propertyValue = $property->getValue($object);
+        // Copy the property
+        $property->setValue($object, $this->recursiveCopy($propertyValue));
+    }
+    /**
+     * Returns first filter that matches variable, `null` if no such filter found.
+     *
+     * @param array $filterRecords Associative array with 2 members: 'filter' with value of type {@see TypeFilter} and
+     *                             'matcher' with value of type {@see TypeMatcher}
+     * @param mixed $var
+     *
+     * @return TypeFilter|null
+     */
+    private function getFirstMatchedTypeFilter(array $filterRecords, $var)
+    {
+        $matched = $this->first($filterRecords, function (array $record) use($var) {
+            /* @var TypeMatcher $matcher */
+            $matcher = $record['matcher'];
+            return $matcher->matches($var);
+        });
+        return isset($matched) ? $matched['filter'] : null;
+    }
+    /**
+     * Returns first element that matches predicate, `null` if no such element found.
+     *
+     * @param array    $elements Array of ['filter' => Filter, 'matcher' => Matcher] pairs.
+     * @param callable $predicate Predicate arguments are: element.
+     *
+     * @return array|null Associative array with 2 members: 'filter' with value of type {@see TypeFilter} and 'matcher'
+     *                    with value of type {@see TypeMatcher} or `null`.
+     */
+    private function first(array $elements, callable $predicate)
+    {
+        foreach ($elements as $element) {
+            if (\call_user_func($predicate, $element)) {
+                return $element;
+            }
+        }
+        return null;
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\Exception;
+
+use UnexpectedValueException;
+class CloneException extends \UnexpectedValueException
+{
+}
+<?php
+
+namespace PHPUnit\DeepCopy\Exception;
+
+use ReflectionException;
+class PropertyException extends \ReflectionException
+{
+}
+<?php
+
+namespace PHPUnit\DeepCopy\Filter\Doctrine;
+
+use PHPUnit\DeepCopy\Filter\Filter;
+use PHPUnit\DeepCopy\Reflection\ReflectionHelper;
+/**
+ * @final
+ */
+class DoctrineCollectionFilter implements \PHPUnit\DeepCopy\Filter\Filter
+{
+    /**
+     * Copies the object property doctrine collection.
+     *
+     * {@inheritdoc}
+     */
+    public function apply($object, $property, $objectCopier)
+    {
+        $reflectionProperty = \PHPUnit\DeepCopy\Reflection\ReflectionHelper::getProperty($object, $property);
+        $reflectionProperty->setAccessible(\true);
+        $oldCollection = $reflectionProperty->getValue($object);
+        $newCollection = $oldCollection->map(function ($item) use($objectCopier) {
+            return $objectCopier($item);
+        });
+        $reflectionProperty->setValue($object, $newCollection);
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\Filter\Doctrine;
+
+use PHPUnit\DeepCopy\Filter\Filter;
+use PHPUnit\DeepCopy\Reflection\ReflectionHelper;
+use PHPUnit\Doctrine\Common\Collections\ArrayCollection;
+/**
+ * @final
+ */
+class DoctrineEmptyCollectionFilter implements \PHPUnit\DeepCopy\Filter\Filter
+{
+    /**
+     * Sets the object property to an empty doctrine collection.
+     *
+     * @param object   $object
+     * @param string   $property
+     * @param callable $objectCopier
+     */
+    public function apply($object, $property, $objectCopier)
+    {
+        $reflectionProperty = \PHPUnit\DeepCopy\Reflection\ReflectionHelper::getProperty($object, $property);
+        $reflectionProperty->setAccessible(\true);
+        $reflectionProperty->setValue($object, new \PHPUnit\Doctrine\Common\Collections\ArrayCollection());
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\Filter\Doctrine;
+
+use PHPUnit\DeepCopy\Filter\Filter;
+/**
+ * @final
+ */
+class DoctrineProxyFilter implements \PHPUnit\DeepCopy\Filter\Filter
+{
+    /**
+     * Triggers the magic method __load() on a Doctrine Proxy class to load the
+     * actual entity from the database.
+     *
+     * {@inheritdoc}
+     */
+    public function apply($object, $property, $objectCopier)
+    {
+        $object->__load();
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\Filter;
+
+/**
+ * Filter to apply to a property while copying an object
+ */
+interface Filter
+{
+    /**
+     * Applies the filter to the object.
+     *
+     * @param object   $object
+     * @param string   $property
+     * @param callable $objectCopier
+     */
+    public function apply($object, $property, $objectCopier);
+}
+<?php
+
+namespace PHPUnit\DeepCopy\Filter;
+
+class KeepFilter implements \PHPUnit\DeepCopy\Filter\Filter
+{
+    /**
+     * Keeps the value of the object property.
+     *
+     * {@inheritdoc}
+     */
+    public function apply($object, $property, $objectCopier)
+    {
+        // Nothing to do
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\Filter;
+
+use PHPUnit\DeepCopy\Reflection\ReflectionHelper;
+/**
+ * @final
+ */
+class ReplaceFilter implements \PHPUnit\DeepCopy\Filter\Filter
+{
+    /**
+     * @var callable
+     */
+    protected $callback;
+    /**
+     * @param callable $callable Will be called to get the new value for each property to replace
+     */
+    public function __construct(callable $callable)
+    {
+        $this->callback = $callable;
+    }
+    /**
+     * Replaces the object property by the result of the callback called with the object property.
+     *
+     * {@inheritdoc}
+     */
+    public function apply($object, $property, $objectCopier)
+    {
+        $reflectionProperty = \PHPUnit\DeepCopy\Reflection\ReflectionHelper::getProperty($object, $property);
+        $reflectionProperty->setAccessible(\true);
+        $value = \call_user_func($this->callback, $reflectionProperty->getValue($object));
+        $reflectionProperty->setValue($object, $value);
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\Filter;
+
+use PHPUnit\DeepCopy\Reflection\ReflectionHelper;
+/**
+ * @final
+ */
+class SetNullFilter implements \PHPUnit\DeepCopy\Filter\Filter
+{
+    /**
+     * Sets the object property to null.
+     *
+     * {@inheritdoc}
+     */
+    public function apply($object, $property, $objectCopier)
+    {
+        $reflectionProperty = \PHPUnit\DeepCopy\Reflection\ReflectionHelper::getProperty($object, $property);
+        $reflectionProperty->setAccessible(\true);
+        $reflectionProperty->setValue($object, null);
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\Matcher\Doctrine;
+
+use PHPUnit\DeepCopy\Matcher\Matcher;
+use PHPUnit\Doctrine\Common\Persistence\Proxy;
+/**
+ * @final
+ */
+class DoctrineProxyMatcher implements \PHPUnit\DeepCopy\Matcher\Matcher
+{
+    /**
+     * Matches a Doctrine Proxy class.
+     *
+     * {@inheritdoc}
+     */
+    public function matches($object, $property)
+    {
+        return $object instanceof \PHPUnit\Doctrine\Common\Persistence\Proxy;
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\Matcher;
+
+interface Matcher
+{
+    /**
+     * @param object $object
+     * @param string $property
+     *
+     * @return boolean
+     */
+    public function matches($object, $property);
+}
+<?php
+
+namespace PHPUnit\DeepCopy\Matcher;
+
+/**
+ * @final
+ */
+class PropertyMatcher implements \PHPUnit\DeepCopy\Matcher\Matcher
+{
+    /**
+     * @var string
+     */
+    private $class;
+    /**
+     * @var string
+     */
+    private $property;
+    /**
+     * @param string $class    Class name
+     * @param string $property Property name
+     */
+    public function __construct($class, $property)
+    {
+        $this->class = $class;
+        $this->property = $property;
+    }
+    /**
+     * Matches a specific property of a specific class.
+     *
+     * {@inheritdoc}
+     */
+    public function matches($object, $property)
+    {
+        return $object instanceof $this->class && $property == $this->property;
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\Matcher;
+
+/**
+ * @final
+ */
+class PropertyNameMatcher implements \PHPUnit\DeepCopy\Matcher\Matcher
+{
+    /**
+     * @var string
+     */
+    private $property;
+    /**
+     * @param string $property Property name
+     */
+    public function __construct($property)
+    {
+        $this->property = $property;
+    }
+    /**
+     * Matches a property by its name.
+     *
+     * {@inheritdoc}
+     */
+    public function matches($object, $property)
+    {
+        return $property == $this->property;
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\Matcher;
+
+use PHPUnit\DeepCopy\Reflection\ReflectionHelper;
+use ReflectionException;
+/**
+ * Matches a property by its type.
+ *
+ * It is recommended to use {@see DeepCopy\TypeFilter\TypeFilter} instead, as it applies on all occurrences
+ * of given type in copied context (eg. array elements), not just on object properties.
+ *
+ * @final
+ */
+class PropertyTypeMatcher implements \PHPUnit\DeepCopy\Matcher\Matcher
+{
+    /**
+     * @var string
+     */
+    private $propertyType;
+    /**
+     * @param string $propertyType Property type
+     */
+    public function __construct($propertyType)
+    {
+        $this->propertyType = $propertyType;
+    }
+    /**
+     * {@inheritdoc}
+     */
+    public function matches($object, $property)
+    {
+        try {
+            $reflectionProperty = \PHPUnit\DeepCopy\Reflection\ReflectionHelper::getProperty($object, $property);
+        } catch (\ReflectionException $exception) {
+            return \false;
+        }
+        $reflectionProperty->setAccessible(\true);
+        return $reflectionProperty->getValue($object) instanceof $this->propertyType;
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\Reflection;
+
+use PHPUnit\DeepCopy\Exception\PropertyException;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionObject;
+use ReflectionProperty;
+class ReflectionHelper
+{
+    /**
+     * Retrieves all properties (including private ones), from object and all its ancestors.
+     *
+     * Standard \ReflectionClass->getProperties() does not return private properties from ancestor classes.
+     *
+     * @author muratyaman@gmail.com
+     * @see http://php.net/manual/en/reflectionclass.getproperties.php
+     *
+     * @param ReflectionClass $ref
+     *
+     * @return ReflectionProperty[]
+     */
+    public static function getProperties(\ReflectionClass $ref)
+    {
+        $props = $ref->getProperties();
+        $propsArr = array();
+        foreach ($props as $prop) {
+            $propertyName = $prop->getName();
+            $propsArr[$propertyName] = $prop;
+        }
+        if ($parentClass = $ref->getParentClass()) {
+            $parentPropsArr = self::getProperties($parentClass);
+            foreach ($propsArr as $key => $property) {
+                $parentPropsArr[$key] = $property;
+            }
+            return $parentPropsArr;
+        }
+        return $propsArr;
+    }
+    /**
+     * Retrieves property by name from object and all its ancestors.
+     *
+     * @param object|string $object
+     * @param string $name
+     *
+     * @throws PropertyException
+     * @throws ReflectionException
+     *
+     * @return ReflectionProperty
+     */
+    public static function getProperty($object, $name)
+    {
+        $reflection = \is_object($object) ? new \ReflectionObject($object) : new \ReflectionClass($object);
+        if ($reflection->hasProperty($name)) {
+            return $reflection->getProperty($name);
+        }
+        if ($parentClass = $reflection->getParentClass()) {
+            return self::getProperty($parentClass->getName(), $name);
+        }
+        throw new \PHPUnit\DeepCopy\Exception\PropertyException(\sprintf('The class "%s" doesn\'t have a property with the given name: "%s".', \is_object($object) ? \get_class($object) : $object, $name));
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\TypeFilter\Date;
+
+use DateInterval;
+use PHPUnit\DeepCopy\TypeFilter\TypeFilter;
+/**
+ * @final
+ *
+ * @deprecated Will be removed in 2.0. This filter will no longer be necessary in PHP 7.1+.
+ */
+class DateIntervalFilter implements \PHPUnit\DeepCopy\TypeFilter\TypeFilter
+{
+    /**
+     * {@inheritdoc}
+     *
+     * @param DateInterval $element
+     *
+     * @see http://news.php.net/php.bugs/205076
+     */
+    public function apply($element)
+    {
+        $copy = new \DateInterval('P0D');
+        foreach ($element as $propertyName => $propertyValue) {
+            $copy->{$propertyName} = $propertyValue;
+        }
+        return $copy;
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\TypeFilter;
+
+/**
+ * @final
+ */
+class ReplaceFilter implements \PHPUnit\DeepCopy\TypeFilter\TypeFilter
+{
+    /**
+     * @var callable
+     */
+    protected $callback;
+    /**
+     * @param callable $callable Will be called to get the new value for each element to replace
+     */
+    public function __construct(callable $callable)
+    {
+        $this->callback = $callable;
+    }
+    /**
+     * {@inheritdoc}
+     */
+    public function apply($element)
+    {
+        return \call_user_func($this->callback, $element);
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\TypeFilter;
+
+/**
+ * @final
+ */
+class ShallowCopyFilter implements \PHPUnit\DeepCopy\TypeFilter\TypeFilter
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function apply($element)
+    {
+        return clone $element;
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\TypeFilter\Spl;
+
+/**
+ * @deprecated Use {@see SplDoublyLinkedListFilter} instead.
+ */
+class SplDoublyLinkedList extends \PHPUnit\DeepCopy\TypeFilter\Spl\SplDoublyLinkedListFilter
+{
+}
+<?php
+
+namespace PHPUnit\DeepCopy\TypeFilter\Spl;
+
+use Closure;
+use PHPUnit\DeepCopy\DeepCopy;
+use PHPUnit\DeepCopy\TypeFilter\TypeFilter;
+use SplDoublyLinkedList;
+/**
+ * @final
+ */
+class SplDoublyLinkedListFilter implements \PHPUnit\DeepCopy\TypeFilter\TypeFilter
+{
+    private $copier;
+    public function __construct(\PHPUnit\DeepCopy\DeepCopy $copier)
+    {
+        $this->copier = $copier;
+    }
+    /**
+     * {@inheritdoc}
+     */
+    public function apply($element)
+    {
+        $newElement = clone $element;
+        $copy = $this->createCopyClosure();
+        return $copy($newElement);
+    }
+    private function createCopyClosure()
+    {
+        $copier = $this->copier;
+        $copy = function (\SplDoublyLinkedList $list) use($copier) {
+            // Replace each element in the list with a deep copy of itself
+            for ($i = 1; $i <= $list->count(); $i++) {
+                $copy = $copier->recursiveCopy($list->shift());
+                $list->push($copy);
+            }
+            return $list;
+        };
+        return \Closure::bind($copy, null, \PHPUnit\DeepCopy\DeepCopy::class);
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy\TypeFilter;
+
+interface TypeFilter
+{
+    /**
+     * Applies the filter to the object.
+     *
+     * @param mixed $element
+     */
+    public function apply($element);
+}
+<?php
+
+namespace PHPUnit\DeepCopy\TypeMatcher;
+
+class TypeMatcher
+{
+    /**
+     * @var string
+     */
+    private $type;
+    /**
+     * @param string $type
+     */
+    public function __construct($type)
+    {
+        $this->type = $type;
+    }
+    /**
+     * @param mixed $element
+     *
+     * @return boolean
+     */
+    public function matches($element)
+    {
+        return \is_object($element) ? \is_a($element, $this->type) : \gettype($element) === $this->type;
+    }
+}
+<?php
+
+namespace PHPUnit\DeepCopy;
+
+use function function_exists;
+if (\false === \function_exists('PHPUnit\\DeepCopy\\deep_copy')) {
+    /**
+     * Deep copies the given value.
+     *
+     * @param mixed $value
+     * @param bool  $useCloneMethod
+     *
+     * @return mixed
+     */
+    function deep_copy($value, $useCloneMethod = \false)
+    {
+        return (new \PHPUnit\DeepCopy\DeepCopy($useCloneMethod))->copy($value);
+    }
+}
+The MIT License (MIT)
+
+Copyright (c) 2013 My C-Sense
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Object Enumerator
+
+Copyright (c) 2016-2017, Sebastian Bergmann <sebastian@phpunit.de>.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+ * Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+
+ * Neither the name of Sebastian Bergmann nor the names of his
+   contributors may be used to endorse or promote products derived
+   from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+Object Reflector
+
+Copyright (c) 2017, Sebastian Bergmann <sebastian@phpunit.de>.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+ * Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+
+ * Neither the name of Sebastian Bergmann nor the names of his
+   contributors may be used to endorse or promote products derived
+   from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+manifest
+
+Copyright (c) 2016 Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>, and contributors
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice,
+  this list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of Arne Blankerts nor the names of contributors
+  may be used to endorse or promote products derived from this software
+  without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT  * NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+use PHPUnit\PharIo\Version\Version;
+use PHPUnit\PharIo\Version\Exception as VersionException;
+use PHPUnit\PharIo\Version\VersionConstraintParser;
+class ManifestDocumentMapper
+{
+    /**
+     * @param ManifestDocument $document
+     *
+     * @returns Manifest
+     *
+     * @throws ManifestDocumentMapperException
+     */
+    public function map(\PHPUnit\PharIo\Manifest\ManifestDocument $document)
+    {
+        try {
+            $contains = $document->getContainsElement();
+            $type = $this->mapType($contains);
+            $copyright = $this->mapCopyright($document->getCopyrightElement());
+            $requirements = $this->mapRequirements($document->getRequiresElement());
+            $bundledComponents = $this->mapBundledComponents($document);
+            return new \PHPUnit\PharIo\Manifest\Manifest(new \PHPUnit\PharIo\Manifest\ApplicationName($contains->getName()), new \PHPUnit\PharIo\Version\Version($contains->getVersion()), $type, $copyright, $requirements, $bundledComponents);
+        } catch (\PHPUnit\PharIo\Version\Exception $e) {
+            throw new \PHPUnit\PharIo\Manifest\ManifestDocumentMapperException($e->getMessage(), $e->getCode(), $e);
+        } catch (\PHPUnit\PharIo\Manifest\Exception $e) {
+            throw new \PHPUnit\PharIo\Manifest\ManifestDocumentMapperException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+    /**
+     * @param ContainsElement $contains
+     *
+     * @return Type
+     *
+     * @throws ManifestDocumentMapperException
+     */
+    private function mapType(\PHPUnit\PharIo\Manifest\ContainsElement $contains)
+    {
+        switch ($contains->getType()) {
+            case 'application':
+                return \PHPUnit\PharIo\Manifest\Type::application();
+            case 'library':
+                return \PHPUnit\PharIo\Manifest\Type::library();
+            case 'extension':
+                return $this->mapExtension($contains->getExtensionElement());
+        }
+        throw new \PHPUnit\PharIo\Manifest\ManifestDocumentMapperException(\sprintf('Unsupported type %s', $contains->getType()));
+    }
+    /**
+     * @param CopyrightElement $copyright
+     *
+     * @return CopyrightInformation
+     *
+     * @throws InvalidUrlException
+     * @throws InvalidEmailException
+     */
+    private function mapCopyright(\PHPUnit\PharIo\Manifest\CopyrightElement $copyright)
+    {
+        $authors = new \PHPUnit\PharIo\Manifest\AuthorCollection();
+        foreach ($copyright->getAuthorElements() as $authorElement) {
+            $authors->add(new \PHPUnit\PharIo\Manifest\Author($authorElement->getName(), new \PHPUnit\PharIo\Manifest\Email($authorElement->getEmail())));
+        }
+        $licenseElement = $copyright->getLicenseElement();
+        $license = new \PHPUnit\PharIo\Manifest\License($licenseElement->getType(), new \PHPUnit\PharIo\Manifest\Url($licenseElement->getUrl()));
+        return new \PHPUnit\PharIo\Manifest\CopyrightInformation($authors, $license);
+    }
+    /**
+     * @param RequiresElement $requires
+     *
+     * @return RequirementCollection
+     *
+     * @throws ManifestDocumentMapperException
+     */
+    private function mapRequirements(\PHPUnit\PharIo\Manifest\RequiresElement $requires)
+    {
+        $collection = new \PHPUnit\PharIo\Manifest\RequirementCollection();
+        $phpElement = $requires->getPHPElement();
+        $parser = new \PHPUnit\PharIo\Version\VersionConstraintParser();
+        try {
+            $versionConstraint = $parser->parse($phpElement->getVersion());
+        } catch (\PHPUnit\PharIo\Version\Exception $e) {
+            throw new \PHPUnit\PharIo\Manifest\ManifestDocumentMapperException(\sprintf('Unsupported version constraint - %s', $e->getMessage()), $e->getCode(), $e);
+        }
+        $collection->add(new \PHPUnit\PharIo\Manifest\PhpVersionRequirement($versionConstraint));
+        if (!$phpElement->hasExtElements()) {
+            return $collection;
+        }
+        foreach ($phpElement->getExtElements() as $extElement) {
+            $collection->add(new \PHPUnit\PharIo\Manifest\PhpExtensionRequirement($extElement->getName()));
+        }
+        return $collection;
+    }
+    /**
+     * @param ManifestDocument $document
+     *
+     * @return BundledComponentCollection
+     */
+    private function mapBundledComponents(\PHPUnit\PharIo\Manifest\ManifestDocument $document)
+    {
+        $collection = new \PHPUnit\PharIo\Manifest\BundledComponentCollection();
+        if (!$document->hasBundlesElement()) {
+            return $collection;
+        }
+        foreach ($document->getBundlesElement()->getComponentElements() as $componentElement) {
+            $collection->add(new \PHPUnit\PharIo\Manifest\BundledComponent($componentElement->getName(), new \PHPUnit\PharIo\Version\Version($componentElement->getVersion())));
+        }
+        return $collection;
+    }
+    /**
+     * @param ExtensionElement $extension
+     *
+     * @return Extension
+     *
+     * @throws ManifestDocumentMapperException
+     */
+    private function mapExtension(\PHPUnit\PharIo\Manifest\ExtensionElement $extension)
+    {
+        try {
+            $parser = new \PHPUnit\PharIo\Version\VersionConstraintParser();
+            $versionConstraint = $parser->parse($extension->getCompatible());
+            return \PHPUnit\PharIo\Manifest\Type::extension(new \PHPUnit\PharIo\Manifest\ApplicationName($extension->getFor()), $versionConstraint);
+        } catch (\PHPUnit\PharIo\Version\Exception $e) {
+            throw new \PHPUnit\PharIo\Manifest\ManifestDocumentMapperException(\sprintf('Unsupported version constraint - %s', $e->getMessage()), $e->getCode(), $e);
+        }
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class ManifestLoader
+{
+    /**
+     * @param string $filename
+     *
+     * @return Manifest
+     *
+     * @throws ManifestLoaderException
+     */
+    public static function fromFile($filename)
+    {
+        try {
+            return (new \PHPUnit\PharIo\Manifest\ManifestDocumentMapper())->map(\PHPUnit\PharIo\Manifest\ManifestDocument::fromFile($filename));
+        } catch (\PHPUnit\PharIo\Manifest\Exception $e) {
+            throw new \PHPUnit\PharIo\Manifest\ManifestLoaderException(\sprintf('Loading %s failed.', $filename), $e->getCode(), $e);
+        }
+    }
+    /**
+     * @param string $filename
+     *
+     * @return Manifest
+     *
+     * @throws ManifestLoaderException
+     */
+    public static function fromPhar($filename)
+    {
+        return self::fromFile('phar://' . $filename . '/manifest.xml');
+    }
+    /**
+     * @param string $manifest
+     *
+     * @return Manifest
+     *
+     * @throws ManifestLoaderException
+     */
+    public static function fromString($manifest)
+    {
+        try {
+            return (new \PHPUnit\PharIo\Manifest\ManifestDocumentMapper())->map(\PHPUnit\PharIo\Manifest\ManifestDocument::fromString($manifest));
+        } catch (\PHPUnit\PharIo\Manifest\Exception $e) {
+            throw new \PHPUnit\PharIo\Manifest\ManifestLoaderException('Processing string failed', $e->getCode(), $e);
+        }
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+use PHPUnit\PharIo\Version\AnyVersionConstraint;
+use PHPUnit\PharIo\Version\Version;
+use PHPUnit\PharIo\Version\VersionConstraint;
+use XMLWriter;
+class ManifestSerializer
+{
+    /**
+     * @var XMLWriter
+     */
+    private $xmlWriter;
+    public function serializeToFile(\PHPUnit\PharIo\Manifest\Manifest $manifest, $filename)
+    {
+        \file_put_contents($filename, $this->serializeToString($manifest));
+    }
+    public function serializeToString(\PHPUnit\PharIo\Manifest\Manifest $manifest)
+    {
+        $this->startDocument();
+        $this->addContains($manifest->getName(), $manifest->getVersion(), $manifest->getType());
+        $this->addCopyright($manifest->getCopyrightInformation());
+        $this->addRequirements($manifest->getRequirements());
+        $this->addBundles($manifest->getBundledComponents());
+        return $this->finishDocument();
+    }
+    private function startDocument()
+    {
+        $xmlWriter = new \XMLWriter();
+        $xmlWriter->openMemory();
+        $xmlWriter->setIndent(\true);
+        $xmlWriter->setIndentString(\str_repeat(' ', 4));
+        $xmlWriter->startDocument('1.0', 'UTF-8');
+        $xmlWriter->startElement('phar');
+        $xmlWriter->writeAttribute('xmlns', 'https://phar.io/xml/manifest/1.0');
+        $this->xmlWriter = $xmlWriter;
+    }
+    private function finishDocument()
+    {
+        $this->xmlWriter->endElement();
+        $this->xmlWriter->endDocument();
+        return $this->xmlWriter->outputMemory();
+    }
+    private function addContains($name, \PHPUnit\PharIo\Version\Version $version, \PHPUnit\PharIo\Manifest\Type $type)
+    {
+        $this->xmlWriter->startElement('contains');
+        $this->xmlWriter->writeAttribute('name', $name);
+        $this->xmlWriter->writeAttribute('version', $version->getVersionString());
+        switch (\true) {
+            case $type->isApplication():
+                $this->xmlWriter->writeAttribute('type', 'application');
+                break;
+            case $type->isLibrary():
+                $this->xmlWriter->writeAttribute('type', 'library');
+                break;
+            case $type->isExtension():
+                /* @var $type Extension */
+                $this->xmlWriter->writeAttribute('type', 'extension');
+                $this->addExtension($type->getApplicationName(), $type->getVersionConstraint());
+                break;
+            default:
+                $this->xmlWriter->writeAttribute('type', 'custom');
+        }
+        $this->xmlWriter->endElement();
+    }
+    private function addCopyright(\PHPUnit\PharIo\Manifest\CopyrightInformation $copyrightInformation)
+    {
+        $this->xmlWriter->startElement('copyright');
+        foreach ($copyrightInformation->getAuthors() as $author) {
+            $this->xmlWriter->startElement('author');
+            $this->xmlWriter->writeAttribute('name', $author->getName());
+            $this->xmlWriter->writeAttribute('email', (string) $author->getEmail());
+            $this->xmlWriter->endElement();
+        }
+        $license = $copyrightInformation->getLicense();
+        $this->xmlWriter->startElement('license');
+        $this->xmlWriter->writeAttribute('type', $license->getName());
+        $this->xmlWriter->writeAttribute('url', $license->getUrl());
+        $this->xmlWriter->endElement();
+        $this->xmlWriter->endElement();
+    }
+    private function addRequirements(\PHPUnit\PharIo\Manifest\RequirementCollection $requirementCollection)
+    {
+        $phpRequirement = new \PHPUnit\PharIo\Version\AnyVersionConstraint();
+        $extensions = [];
+        foreach ($requirementCollection as $requirement) {
+            if ($requirement instanceof \PHPUnit\PharIo\Manifest\PhpVersionRequirement) {
+                $phpRequirement = $requirement->getVersionConstraint();
+                continue;
+            }
+            if ($requirement instanceof \PHPUnit\PharIo\Manifest\PhpExtensionRequirement) {
+                $extensions[] = (string) $requirement;
+            }
+        }
+        $this->xmlWriter->startElement('requires');
+        $this->xmlWriter->startElement('php');
+        $this->xmlWriter->writeAttribute('version', $phpRequirement->asString());
+        foreach ($extensions as $extension) {
+            $this->xmlWriter->startElement('ext');
+            $this->xmlWriter->writeAttribute('name', $extension);
+            $this->xmlWriter->endElement();
+        }
+        $this->xmlWriter->endElement();
+        $this->xmlWriter->endElement();
+    }
+    private function addBundles(\PHPUnit\PharIo\Manifest\BundledComponentCollection $bundledComponentCollection)
+    {
+        if (\count($bundledComponentCollection) === 0) {
+            return;
+        }
+        $this->xmlWriter->startElement('bundles');
+        foreach ($bundledComponentCollection as $bundledComponent) {
+            $this->xmlWriter->startElement('component');
+            $this->xmlWriter->writeAttribute('name', $bundledComponent->getName());
+            $this->xmlWriter->writeAttribute('version', $bundledComponent->getVersion()->getVersionString());
+            $this->xmlWriter->endElement();
+        }
+        $this->xmlWriter->endElement();
+    }
+    private function addExtension($application, \PHPUnit\PharIo\Version\VersionConstraint $versionConstraint)
+    {
+        $this->xmlWriter->startElement('extension');
+        $this->xmlWriter->writeAttribute('for', $application);
+        $this->xmlWriter->writeAttribute('compatible', $versionConstraint->asString());
+        $this->xmlWriter->endElement();
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+interface Exception
+{
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class InvalidApplicationNameException extends \InvalidArgumentException implements \PHPUnit\PharIo\Manifest\Exception
+{
+    const NotAString = 1;
+    const InvalidFormat = 2;
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class InvalidEmailException extends \InvalidArgumentException implements \PHPUnit\PharIo\Manifest\Exception
+{
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class InvalidUrlException extends \InvalidArgumentException implements \PHPUnit\PharIo\Manifest\Exception
+{
+}
+<?php
+
+namespace PHPUnit\PharIo\Manifest;
+
+class ManifestDocumentException extends \RuntimeException implements \PHPUnit\PharIo\Manifest\Exception
+{
+}
+<?php
+
+namespace PHPUnit\PharIo\Manifest;
+
+class ManifestDocumentMapperException extends \RuntimeException implements \PHPUnit\PharIo\Manifest\Exception
+{
+}
+<?php
+
+namespace PHPUnit\PharIo\Manifest;
+
+class ManifestElementException extends \RuntimeException implements \PHPUnit\PharIo\Manifest\Exception
+{
+}
+<?php
+
+namespace PHPUnit\PharIo\Manifest;
+
+class ManifestLoaderException extends \Exception implements \PHPUnit\PharIo\Manifest\Exception
+{
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class Application extends \PHPUnit\PharIo\Manifest\Type
+{
+    /**
+     * @return bool
+     */
+    public function isApplication()
+    {
+        return \true;
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class ApplicationName
+{
+    /**
+     * @var string
+     */
+    private $name;
+    /**
+     * ApplicationName constructor.
+     *
+     * @param string $name
+     *
+     * @throws InvalidApplicationNameException
+     */
+    public function __construct($name)
+    {
+        $this->ensureIsString($name);
+        $this->ensureValidFormat($name);
+        $this->name = $name;
+    }
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->name;
+    }
+    public function isEqual(\PHPUnit\PharIo\Manifest\ApplicationName $name)
+    {
+        return $this->name === $name->name;
+    }
+    /**
+     * @param string $name
+     *
+     * @throws InvalidApplicationNameException
+     */
+    private function ensureValidFormat($name)
+    {
+        if (!\preg_match('#\\w/\\w#', $name)) {
+            throw new \PHPUnit\PharIo\Manifest\InvalidApplicationNameException(\sprintf('Format of name "%s" is not valid - expected: vendor/packagename', $name), \PHPUnit\PharIo\Manifest\InvalidApplicationNameException::InvalidFormat);
+        }
+    }
+    private function ensureIsString($name)
+    {
+        if (!\is_string($name)) {
+            throw new \PHPUnit\PharIo\Manifest\InvalidApplicationNameException('Name must be a string', \PHPUnit\PharIo\Manifest\InvalidApplicationNameException::NotAString);
+        }
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class Author
+{
+    /**
+     * @var string
+     */
+    private $name;
+    /**
+     * @var Email
+     */
+    private $email;
+    /**
+     * @param string $name
+     * @param Email  $email
+     */
+    public function __construct($name, \PHPUnit\PharIo\Manifest\Email $email)
+    {
+        $this->name = $name;
+        $this->email = $email;
+    }
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+    /**
+     * @return Email
+     */
+    public function getEmail()
+    {
+        return $this->email;
+    }
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return \sprintf('%s <%s>', $this->name, $this->email);
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class AuthorCollection implements \Countable, \IteratorAggregate
+{
+    /**
+     * @var Author[]
+     */
+    private $authors = [];
+    public function add(\PHPUnit\PharIo\Manifest\Author $author)
+    {
+        $this->authors[] = $author;
+    }
+    /**
+     * @return Author[]
+     */
+    public function getAuthors()
+    {
+        return $this->authors;
+    }
+    /**
+     * @return int
+     */
+    public function count()
+    {
+        return \count($this->authors);
+    }
+    /**
+     * @return AuthorCollectionIterator
+     */
+    public function getIterator()
+    {
+        return new \PHPUnit\PharIo\Manifest\AuthorCollectionIterator($this);
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class AuthorCollectionIterator implements \Iterator
+{
+    /**
+     * @var Author[]
+     */
+    private $authors = [];
+    /**
+     * @var int
+     */
+    private $position;
+    public function __construct(\PHPUnit\PharIo\Manifest\AuthorCollection $authors)
+    {
+        $this->authors = $authors->getAuthors();
+    }
+    public function rewind()
+    {
+        $this->position = 0;
+    }
+    /**
+     * @return bool
+     */
+    public function valid()
+    {
+        return $this->position < \count($this->authors);
+    }
+    /**
+     * @return int
+     */
+    public function key()
+    {
+        return $this->position;
+    }
+    /**
+     * @return Author
+     */
+    public function current()
+    {
+        return $this->authors[$this->position];
+    }
+    public function next()
+    {
+        $this->position++;
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+use PHPUnit\PharIo\Version\Version;
+class BundledComponent
+{
+    /**
+     * @var string
+     */
+    private $name;
+    /**
+     * @var Version
+     */
+    private $version;
+    /**
+     * @param string  $name
+     * @param Version $version
+     */
+    public function __construct($name, \PHPUnit\PharIo\Version\Version $version)
+    {
+        $this->name = $name;
+        $this->version = $version;
+    }
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+    /**
+     * @return Version
+     */
+    public function getVersion()
+    {
+        return $this->version;
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class BundledComponentCollection implements \Countable, \IteratorAggregate
+{
+    /**
+     * @var BundledComponent[]
+     */
+    private $bundledComponents = [];
+    public function add(\PHPUnit\PharIo\Manifest\BundledComponent $bundledComponent)
+    {
+        $this->bundledComponents[] = $bundledComponent;
+    }
+    /**
+     * @return BundledComponent[]
+     */
+    public function getBundledComponents()
+    {
+        return $this->bundledComponents;
+    }
+    /**
+     * @return int
+     */
+    public function count()
+    {
+        return \count($this->bundledComponents);
+    }
+    /**
+     * @return BundledComponentCollectionIterator
+     */
+    public function getIterator()
+    {
+        return new \PHPUnit\PharIo\Manifest\BundledComponentCollectionIterator($this);
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class BundledComponentCollectionIterator implements \Iterator
+{
+    /**
+     * @var BundledComponent[]
+     */
+    private $bundledComponents = [];
+    /**
+     * @var int
+     */
+    private $position;
+    public function __construct(\PHPUnit\PharIo\Manifest\BundledComponentCollection $bundledComponents)
+    {
+        $this->bundledComponents = $bundledComponents->getBundledComponents();
+    }
+    public function rewind()
+    {
+        $this->position = 0;
+    }
+    /**
+     * @return bool
+     */
+    public function valid()
+    {
+        return $this->position < \count($this->bundledComponents);
+    }
+    /**
+     * @return int
+     */
+    public function key()
+    {
+        return $this->position;
+    }
+    /**
+     * @return BundledComponent
+     */
+    public function current()
+    {
+        return $this->bundledComponents[$this->position];
+    }
+    public function next()
+    {
+        $this->position++;
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class CopyrightInformation
+{
+    /**
+     * @var AuthorCollection
+     */
+    private $authors;
+    /**
+     * @var License
+     */
+    private $license;
+    public function __construct(\PHPUnit\PharIo\Manifest\AuthorCollection $authors, \PHPUnit\PharIo\Manifest\License $license)
+    {
+        $this->authors = $authors;
+        $this->license = $license;
+    }
+    /**
+     * @return AuthorCollection
+     */
+    public function getAuthors()
+    {
+        return $this->authors;
+    }
+    /**
+     * @return License
+     */
+    public function getLicense()
+    {
+        return $this->license;
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class Email
+{
+    /**
+     * @var string
+     */
+    private $email;
+    /**
+     * @param string $email
+     *
+     * @throws InvalidEmailException
+     */
+    public function __construct($email)
+    {
+        $this->ensureEmailIsValid($email);
+        $this->email = $email;
+    }
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->email;
+    }
+    /**
+     * @param string $url
+     *
+     * @throws InvalidEmailException
+     */
+    private function ensureEmailIsValid($url)
+    {
+        if (\filter_var($url, \FILTER_VALIDATE_EMAIL) === \false) {
+            throw new \PHPUnit\PharIo\Manifest\InvalidEmailException();
+        }
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+use PHPUnit\PharIo\Version\Version;
+use PHPUnit\PharIo\Version\VersionConstraint;
+class Extension extends \PHPUnit\PharIo\Manifest\Type
+{
+    /**
+     * @var ApplicationName
+     */
+    private $application;
+    /**
+     * @var VersionConstraint
+     */
+    private $versionConstraint;
+    /**
+     * @param ApplicationName   $application
+     * @param VersionConstraint $versionConstraint
+     */
+    public function __construct(\PHPUnit\PharIo\Manifest\ApplicationName $application, \PHPUnit\PharIo\Version\VersionConstraint $versionConstraint)
+    {
+        $this->application = $application;
+        $this->versionConstraint = $versionConstraint;
+    }
+    /**
+     * @return ApplicationName
+     */
+    public function getApplicationName()
+    {
+        return $this->application;
+    }
+    /**
+     * @return VersionConstraint
+     */
+    public function getVersionConstraint()
+    {
+        return $this->versionConstraint;
+    }
+    /**
+     * @return bool
+     */
+    public function isExtension()
+    {
+        return \true;
+    }
+    /**
+     * @param ApplicationName $name
+     *
+     * @return bool
+     */
+    public function isExtensionFor(\PHPUnit\PharIo\Manifest\ApplicationName $name)
+    {
+        return $this->application->isEqual($name);
+    }
+    /**
+     * @param ApplicationName $name
+     * @param Version         $version
+     *
+     * @return bool
+     */
+    public function isCompatibleWith(\PHPUnit\PharIo\Manifest\ApplicationName $name, \PHPUnit\PharIo\Version\Version $version)
+    {
+        return $this->isExtensionFor($name) && $this->versionConstraint->complies($version);
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class Library extends \PHPUnit\PharIo\Manifest\Type
+{
+    /**
+     * @return bool
+     */
+    public function isLibrary()
+    {
+        return \true;
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class License
+{
+    /**
+     * @var string
+     */
+    private $name;
+    /**
+     * @var Url
+     */
+    private $url;
+    public function __construct($name, \PHPUnit\PharIo\Manifest\Url $url)
+    {
+        $this->name = $name;
+        $this->url = $url;
+    }
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+    /**
+     * @return Url
+     */
+    public function getUrl()
+    {
+        return $this->url;
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+use PHPUnit\PharIo\Version\Version;
+class Manifest
+{
+    /**
+     * @var ApplicationName
+     */
+    private $name;
+    /**
+     * @var Version
+     */
+    private $version;
+    /**
+     * @var Type
+     */
+    private $type;
+    /**
+     * @var CopyrightInformation
+     */
+    private $copyrightInformation;
+    /**
+     * @var RequirementCollection
+     */
+    private $requirements;
+    /**
+     * @var BundledComponentCollection
+     */
+    private $bundledComponents;
+    public function __construct(\PHPUnit\PharIo\Manifest\ApplicationName $name, \PHPUnit\PharIo\Version\Version $version, \PHPUnit\PharIo\Manifest\Type $type, \PHPUnit\PharIo\Manifest\CopyrightInformation $copyrightInformation, \PHPUnit\PharIo\Manifest\RequirementCollection $requirements, \PHPUnit\PharIo\Manifest\BundledComponentCollection $bundledComponents)
+    {
+        $this->name = $name;
+        $this->version = $version;
+        $this->type = $type;
+        $this->copyrightInformation = $copyrightInformation;
+        $this->requirements = $requirements;
+        $this->bundledComponents = $bundledComponents;
+    }
+    /**
+     * @return ApplicationName
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+    /**
+     * @return Version
+     */
+    public function getVersion()
+    {
+        return $this->version;
+    }
+    /**
+     * @return Type
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+    /**
+     * @return CopyrightInformation
+     */
+    public function getCopyrightInformation()
+    {
+        return $this->copyrightInformation;
+    }
+    /**
+     * @return RequirementCollection
+     */
+    public function getRequirements()
+    {
+        return $this->requirements;
+    }
+    /**
+     * @return BundledComponentCollection
+     */
+    public function getBundledComponents()
+    {
+        return $this->bundledComponents;
+    }
+    /**
+     * @return bool
+     */
+    public function isApplication()
+    {
+        return $this->type->isApplication();
+    }
+    /**
+     * @return bool
+     */
+    public function isLibrary()
+    {
+        return $this->type->isLibrary();
+    }
+    /**
+     * @return bool
+     */
+    public function isExtension()
+    {
+        return $this->type->isExtension();
+    }
+    /**
+     * @param ApplicationName $application
+     * @param Version|null    $version
+     *
+     * @return bool
+     */
+    public function isExtensionFor(\PHPUnit\PharIo\Manifest\ApplicationName $application, \PHPUnit\PharIo\Version\Version $version = null)
+    {
+        if (!$this->isExtension()) {
+            return \false;
+        }
+        /** @var Extension $type */
+        $type = $this->type;
+        if ($version !== null) {
+            return $type->isCompatibleWith($application, $version);
+        }
+        return $type->isExtensionFor($application);
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class PhpExtensionRequirement implements \PHPUnit\PharIo\Manifest\Requirement
+{
+    /**
+     * @var string
+     */
+    private $extension;
+    /**
+     * @param string $extension
+     */
+    public function __construct($extension)
+    {
+        $this->extension = $extension;
+    }
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->extension;
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+use PHPUnit\PharIo\Version\VersionConstraint;
+class PhpVersionRequirement implements \PHPUnit\PharIo\Manifest\Requirement
+{
+    /**
+     * @var VersionConstraint
+     */
+    private $versionConstraint;
+    public function __construct(\PHPUnit\PharIo\Version\VersionConstraint $versionConstraint)
+    {
+        $this->versionConstraint = $versionConstraint;
+    }
+    /**
+     * @return VersionConstraint
+     */
+    public function getVersionConstraint()
+    {
+        return $this->versionConstraint;
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+interface Requirement
+{
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class RequirementCollection implements \Countable, \IteratorAggregate
+{
+    /**
+     * @var Requirement[]
+     */
+    private $requirements = [];
+    public function add(\PHPUnit\PharIo\Manifest\Requirement $requirement)
+    {
+        $this->requirements[] = $requirement;
+    }
+    /**
+     * @return Requirement[]
+     */
+    public function getRequirements()
+    {
+        return $this->requirements;
+    }
+    /**
+     * @return int
+     */
+    public function count()
+    {
+        return \count($this->requirements);
+    }
+    /**
+     * @return RequirementCollectionIterator
+     */
+    public function getIterator()
+    {
+        return new \PHPUnit\PharIo\Manifest\RequirementCollectionIterator($this);
+    }
+}
+<?php
+
+/*
+ * This file is part of PharIo\Manifest.
+ *
+ * (c) Arne Blankerts <arne@blankerts.de>, Sebastian Heuer <sebastian@phpeople.de>, Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace PHPUnit\PharIo\Manifest;
+
+class RequirementCollectionIterator implements \Iterator
+{
+    /**
+     * @var Requirement[]
+     */
+    private $requirements = [];
+    /**
+     * @var int
+     */
+    private $position;
+    public function __construct(\PHPUnit\PharIo\Manifest\RequirementCollection $requirements)
+    {
+        $this->requirements = $requirements->getRequirements();
+    }
+    public f
